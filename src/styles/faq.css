@@ -1,0 +1,93 @@
+/* ============================================================
+   FAQ accordion
+   ============================================================ */
+
+.faq {
+  padding: clamp(4rem, 9vh, 7rem) 0 clamp(5rem, 11vh, 8rem);
+  background:
+    radial-gradient(80% 45% at 50% 100%, rgba(30, 38, 58, 0.4), transparent 70%),
+    var(--bg);
+}
+
+.faq__head {
+  text-align: center;
+  margin-bottom: clamp(2rem, 5vh, 3rem);
+}
+
+.faq__list {
+  width: min(100%, 820px);
+  margin-inline: auto;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.faq-item {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.faq-item.is-open {
+  border-color: rgba(212, 168, 75, 0.45);
+  background: rgba(212, 168, 75, 0.05);
+}
+
+.faq-item__btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  text-align: start;
+  padding: 1.15rem 1.35rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1rem, 0.95rem + 0.4vw, 1.15rem);
+}
+
+.faq-item__icon {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  display: grid;
+  place-items: center;
+  transition: transform 0.4s var(--ease-out), background 0.3s ease, color 0.3s ease;
+}
+
+.faq-item.is-open .faq-item__icon {
+  transform: rotate(45deg);
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #1b1406;
+}
+
+.faq-item__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s var(--ease-out);
+}
+
+.faq-item.is-open .faq-item__panel {
+  grid-template-rows: 1fr;
+}
+
+.faq-item__panel-inner {
+  overflow: hidden;
+}
+
+.faq-item__panel p {
+  padding: 0 1.35rem 1.3rem;
+  color: var(--text-2);
+  font-size: 0.98rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-item__panel,
+  .faq-item__icon {
+    transition: none;
+  }
+}
