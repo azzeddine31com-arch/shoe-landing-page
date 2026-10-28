@@ -3,23 +3,33 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#07090d">
+  <meta name="theme-color" content="#090a0f">
   <title>OBIDER | حذاء أمان بخفة رياضية</title>
   <link rel="preload" href="Main%20video/hero-1080-edc27943d1ea.avif" as="image" type="image/avif" fetchpriority="high">
   <style>
     :root {
       color-scheme: dark;
-      --bg-dark: #07090d;
+      --bg-dark: #090a0f;
       --bg-navy: #101a29;
       --accent-gold: #ffd700;
-      --accent-gold-soft: #ffdc32;
-      --text-primary: #f8fafc;
+      --accent-gold-glow: rgba(255, 215, 0, 0.4);
+      --accent-gold-soft: #ff9900;
+      --text-primary: #ffffff;
       --text-secondary: #cbd5e1;
       --text-muted: #94a3b8;
+      --gradient-overlay: linear-gradient(180deg, rgba(9, 10, 15, 0) 0%, rgba(9, 10, 15, 0.75) 40%, rgba(9, 10, 15, 0.98) 100%);
+      --font-arabic: 'Cairo', 'Tajawal', system-ui, sans-serif;
+      --h1-size: clamp(1.75rem, 5vw, 2.25rem);
+      --h2-size: clamp(1.35rem, 4vw, 1.75rem);
+      --body-size: clamp(0.875rem, 2.5vw, 1rem);
+      --zone-header-height: 12vh;
+      --zone-product-height: 58vh;
+      --zone-content-height: 30vh;
       --content-max: 640px;
       --cta-height: 54px;
+      --cta-reserve: 4.6rem;
       --safe-bottom: env(safe-area-inset-bottom, 0px);
-      font-family: Cairo, Tajawal, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: var(--font-arabic);
       background: var(--bg-dark);
       color: var(--text-primary);
     }
@@ -63,7 +73,7 @@
     }
 
     .hero {
-      background: radial-gradient(ellipse at 50% 32%, #1d2a3c 0%, #101722 42%, #07090d 100%);
+      background: radial-gradient(ellipse at 50% 32%, #1d2a3c 0%, #101722 42%, var(--bg-dark) 100%);
     }
 
     .hero picture { display: block; width: 100%; height: 100%; }
@@ -107,10 +117,10 @@
       position: fixed;
       z-index: 20;
       inset: auto 0 0;
-      height: 47vh;
-      height: 47svh;
+      height: 45vh;
+      height: 45svh;
       pointer-events: none;
-      background: linear-gradient(180deg, rgba(7, 9, 13, 0) 0%, rgba(7, 9, 13, .56) 36%, rgba(7, 9, 13, .96) 100%);
+      background: var(--gradient-overlay);
     }
 
     .section-copy {
@@ -122,37 +132,28 @@
       align-items: flex-start;
       justify-content: flex-end;
       width: 100%;
-      min-height: 30vh;
-      min-height: 30svh;
-      padding: 14px max(22px, calc((100vw - var(--content-max)) / 2)) calc(var(--cta-height) + 26px + var(--safe-bottom));
+      height: auto;
+      min-height: var(--zone-content-height);
+      padding: 0 max(1.25rem, calc((100vw - var(--content-max)) / 2)) calc(1.5rem + var(--cta-reserve) + var(--safe-bottom));
       text-align: right;
       pointer-events: none;
     }
 
     .section-copy > * { pointer-events: auto; }
 
-    .hero-copy { min-height: 37svh; padding-bottom: calc(18px + var(--safe-bottom)); }
+    .hero-copy { min-height: var(--zone-content-height); padding-bottom: calc(1.5rem + var(--safe-bottom)); }
 
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin: 0 0 8px;
+    .feature-tag {
+      display: inline-block;
+      margin: 0 0 .5rem;
+      padding: .25rem .75rem;
+      border: 1px solid var(--accent-gold);
+      border-radius: 20px;
+      background: rgba(255, 215, 0, .15);
       color: var(--accent-gold);
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: .08em;
-      line-height: 1.4;
-      text-transform: uppercase;
-    }
-
-    .eyebrow::before {
-      width: 22px;
-      height: 2px;
-      content: "";
-      border-radius: 5px;
-      background: var(--accent-gold);
-      box-shadow: 0 0 12px rgba(255, 215, 0, .55);
+      font-size: .75rem;
+      font-weight: 700;
+      line-height: 1.5;
     }
 
     h1, h2, p { margin-top: 0; }
@@ -161,7 +162,7 @@
       max-width: 580px;
       margin-bottom: 8px;
       color: var(--text-primary);
-      font-size: clamp(30px, 8.5vw, 42px);
+      font-size: var(--h1-size);
       font-weight: 900;
       line-height: 1.22;
       letter-spacing: -.035em;
@@ -172,20 +173,20 @@
       max-width: 590px;
       margin-bottom: 8px;
       color: var(--text-primary);
-      font-size: clamp(25px, 7vw, 34px);
+      font-size: var(--h2-size);
       font-weight: 900;
       line-height: 1.25;
       letter-spacing: -.025em;
       text-wrap: balance;
     }
 
-    .highlight { color: var(--accent-gold); }
+    .highlight { color: var(--accent-gold); font-weight: 800; }
 
     .copy-body {
       max-width: 560px;
       margin: 0;
       color: var(--text-secondary);
-      font-size: clamp(15px, 4vw, 18px);
+      font-size: var(--body-size);
       font-weight: 500;
       line-height: 1.65;
       text-wrap: pretty;
@@ -216,53 +217,43 @@
       box-shadow: 0 0 10px rgba(255, 215, 0, .75);
     }
 
-    .gold-cta {
+    .cta-wrapper { width: 100%; margin-top: .75rem; }
+
+    .btn-primary-glow {
       position: relative;
-      display: inline-flex;
+      display: flex;
       align-items: center;
       justify-content: center;
+      gap: .75rem;
       width: 100%;
-      min-height: var(--cta-height);
-      margin-top: 13px;
-      padding: 12px 18px;
+      height: 54px;
+      margin: 0;
+      padding: 0 18px;
       overflow: hidden;
-      border: 1px solid rgba(255, 247, 196, .72);
-      border-radius: 14px;
-      background: linear-gradient(105deg, #f4bf00 0%, #ffe650 45%, #e8aa00 100%);
-      box-shadow: 0 0 18px rgba(255, 215, 0, .37), 0 9px 28px rgba(0, 0, 0, .32), inset 0 1px rgba(255,255,255,.55);
-      color: #111318;
+      border: 0;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #ffd700 0%, #ff9900 100%);
+      box-shadow: 0 0 25px var(--accent-gold-glow);
+      color: #000;
       cursor: pointer;
-      font-size: 16px;
-      font-weight: 900;
+      font-family: var(--font-arabic);
+      font-size: 1.1rem;
+      font-weight: 800;
       line-height: 1.25;
       text-align: center;
-      transition: transform 160ms ease, box-shadow 160ms ease;
-      animation: cta-glow 2.6s ease-in-out infinite;
+      direction: rtl;
+      transition: transform 160ms ease;
+      animation: pulse-glow 2s infinite alternate;
     }
 
-    .gold-cta::after {
-      position: absolute;
-      inset: -70% auto -70% -35%;
-      width: 28%;
-      content: "";
-      transform: rotate(18deg);
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.48), transparent);
-      animation: cta-shine 4.2s ease-in-out infinite;
-      pointer-events: none;
-    }
+    .btn-primary-glow .btn-icon { display: inline-flex; flex: 0 0 auto; }
+    .btn-primary-glow .btn-icon svg { width: 20px; height: 20px; }
+    .btn-primary-glow:active { transform: scale(.98); }
+    .btn-primary-glow:focus-visible, .close-dialog:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 
-    .gold-cta:hover { transform: translateY(-1px); box-shadow: 0 0 24px rgba(255, 215, 0, .52), 0 10px 30px rgba(0,0,0,.36); }
-    .gold-cta:active { transform: translateY(1px) scale(.99); }
-    .gold-cta:focus-visible, .close-dialog:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
-
-    @keyframes cta-glow {
-      0%, 100% { box-shadow: 0 0 14px rgba(255, 215, 0, .3), 0 9px 28px rgba(0,0,0,.3), inset 0 1px rgba(255,255,255,.55); }
-      50% { box-shadow: 0 0 25px rgba(255, 215, 0, .52), 0 9px 28px rgba(0,0,0,.3), inset 0 1px rgba(255,255,255,.62); }
-    }
-
-    @keyframes cta-shine {
-      0%, 28% { left: -35%; }
-      55%, 100% { left: 125%; }
+    @keyframes pulse-glow {
+      0% { box-shadow: 0 0 15px rgba(255, 215, 0, .4); }
+      100% { box-shadow: 0 0 30px rgba(255, 215, 0, .8), 0 0 10px rgba(255, 255, 255, .6); }
     }
 
     #sticky-cta {
@@ -275,11 +266,11 @@
       justify-content: center;
       padding: 9px max(18px, calc((100vw - var(--content-max)) / 2)) calc(9px + var(--safe-bottom));
       border-top: 1px solid rgba(255, 255, 255, .08);
-      background: linear-gradient(180deg, rgba(7,9,13,.04), rgba(7,9,13,.88) 30%, rgba(7,9,13,.98));
+      background: linear-gradient(180deg, rgba(9,10,15,.04), rgba(9,10,15,.88) 30%, rgba(9,10,15,.98));
     }
 
     #sticky-cta[hidden] { display: none; }
-    #sticky-cta .gold-cta { max-width: var(--content-max); margin: 0; min-height: 52px; }
+    #sticky-cta .btn-primary-glow { max-width: var(--content-max); margin: 0; }
 
     #order-dialog {
       width: min(100% - 28px, 530px);
@@ -319,24 +310,10 @@
     .color-option input { accent-color:var(--accent-gold); }
     .order-note { margin:13px 0 0; color:var(--text-muted); font-size:12px; line-height:1.55; }
     #order-status { min-height:20px; margin:9px 0 0; color:#f4d767; font-size:13px; }
-    #order-dialog .gold-cta { margin-top:12px; }
-
-    @media (max-height: 720px) {
-      .section-copy { min-height: 34svh; padding-top: 8px; }
-      .hero-copy { min-height: 40svh; }
-      h1 { font-size: clamp(27px, 7.5vw, 36px); }
-      h2 { font-size: clamp(23px, 6.2vw, 30px); }
-      .copy-body { font-size: 14px; line-height: 1.5; }
-      .trust-badge { margin-bottom: 7px; }
-      .gold-cta { margin-top: 9px; }
-    }
+    #order-dialog .btn-primary-glow { margin-top:12px; }
 
     @media (max-width: 380px) {
       .section-copy { padding-right: 18px; padding-left: 18px; }
-      .hero-copy { min-height: 39svh; }
-      h1 { font-size: 29px; }
-      h2 { font-size: 24px; }
-      .copy-body { font-size: 14px; }
       .order-grid { grid-template-columns:1fr; }
       .field.full { grid-column:auto; }
     }
@@ -347,56 +324,56 @@
   </style>
 </head>
 <body>
-  <main id="story" aria-label="مميزات حذاء الأمان">
+  <main id="story" dir="rtl" aria-label="مميزات حذاء الأمان">
     <section class="section hero" aria-labelledby="hero-title">
       <picture>
         <source srcset="Main%20video/hero-1080-edc27943d1ea.avif" type="image/avif">
         <img src="Main%20video/hero-ced6660f6433.webp" alt="حذاء أمان رياضي باللونين الأسود والرمادي" decoding="async" fetchpriority="high">
       </picture>
       <div class="section-copy hero-copy">
-        <span class="trust-badge">راحة رياضية، وحماية في كل خطوة</span>
-        <h1 id="hero-title">درع لقدميك.<br><span class="highlight">خفة في خطوتك.</span></h1>
-        <p class="copy-body">حذاء أمان OBIDER — حماية عملية بتصميم خفيف ومريح طوال يوم العمل.</p>
-        <button class="gold-cta" type="button" onclick="scrollToOrderForm()">اطلب الآن - الدفع عند الاستلام</button>
+        <span class="trust-badge">حذاء أمان OBIDER</span>
+        <h1 id="hero-title"><span class="highlight">درع لقدميك</span>. خفة في خطوتك.</h1>
+        <p class="copy-body">حذاء الأمان OBIDER. حماية فولاذية وكيفلار بتصميم رياضي خفيف.</p>
+        <div class="cta-wrapper"><button class="btn-primary-glow" type="button" onclick="scrollToOrderForm()"><span class="btn-text">اطلب الآن - الدفع عند الاستلام</span><span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></button></div>
       </div>
     </section>
 
     <section class="section video-section" aria-labelledby="feature-02-title" data-video="1" data-duration="2.12" data-forward="transition-01-forward.mp4" data-reverse="transition-01-reverse.mp4" data-anchor="section-01-anchor.webp">
-      <div class="section-copy"><p class="eyebrow">01 / إغلاق سريع</p><h2 id="feature-02-title">نظام إغلاق سريع <span class="highlight">بلمسة واحدة</span></h2><p class="copy-body">لفّة واحدة لضبط المقاس بثبات، حتى تبقى جاهزاً للعمل بلا رباط مفكوك.</p></div>
+      <div class="section-copy"><span class="feature-tag">نظام الإغلاق السريع</span><h2 id="feature-02-title">اِرتده بـ <span class="highlight">ضغطة واحدة</span>.</h2><p class="copy-body">نظام القرص الدوار (Swivel Buckle) يوفر أربطة سهلة الضغط والتدوير لارتداء سريع وثبات دائم.</p></div>
     </section>
     <section class="section video-section" aria-labelledby="feature-03-title" data-video="2" data-duration="2.53" data-forward="transition-02-forward.mp4" data-reverse="transition-02-reverse.mp4" data-anchor="section-02-anchor.webp">
-      <div class="section-copy"><p class="eyebrow">02 / حماية المقدمة</p><h2 id="feature-03-title">مقدمة فولاذية <span class="highlight">لا تقهر</span></h2><p class="copy-body">تحمّل صدمات حتى 200 جول — حماية موثوقة لأصابع قدميك في بيئة العمل.</p></div>
+      <div class="section-copy"><span class="feature-tag">حماية الصدمات</span><h2 id="feature-03-title">مقدمة <span class="highlight">فولاذية</span> لا تُقهر.</h2><p class="copy-body">غطاء صلب يحمي أصابع قدمك من الصدمات وسقوط الأجسام الثقيلة حتى 200 جول.</p></div>
     </section>
     <section class="section video-section" aria-labelledby="feature-04-title" data-video="3" data-duration="1.73" data-forward="transition-03-forward.mp4" data-reverse="transition-03-reverse.mp4" data-anchor="section-03-anchor.webp">
-      <div class="section-copy"><p class="eyebrow">03 / حماية من الأسفل</p><h2 id="feature-04-title">امشِ بثقة <span class="highlight">فوق الخطر</span></h2><p class="copy-body">نعل مقاوم للثقب يساعد على حماية قدمك من المسامير والأجسام الحادة أثناء العمل.</p></div>
+      <div class="section-copy"><span class="feature-tag">بيئات العمل الخطرة</span><h2 id="feature-04-title">امشِ بثقة فوق <span class="highlight">الخطر</span>.</h2><p class="copy-body">نعل متين مجهز لتحدي أسطح البناء والتضاريس الحادة دون اختراق.</p></div>
     </section>
     <section class="section video-section" aria-labelledby="feature-05-title" data-video="4" data-duration="2.53" data-forward="transition-04-forward.mp4" data-reverse="transition-04-reverse.mp4" data-anchor="section-04-anchor.webp">
-      <div class="section-copy"><p class="eyebrow">04 / نعل داخلي واقٍ</p><h2 id="feature-05-title">كيفلار متين <span class="highlight">بلا وزن زائد</span></h2><p class="copy-body">طبقة كيفلار مرنة وخفيفة، مصممة لمقاومة اختراق الأجسام الحادة بقوة تصل إلى 1100 نيوتن.</p></div>
+      <div class="section-copy"><span class="feature-tag">حماية النعل</span><h2 id="feature-05-title">درع <span class="highlight">الكيفلار</span> المضاد للثقب.</h2><p class="copy-body">نعل أوسط مرن من الكيفلار يمنع اختراق المسامير والشظايا بقوة تصل لـ 1100 نيوتن.</p></div>
     </section>
     <section class="section video-section" aria-labelledby="feature-06-title" data-video="5" data-duration="2.53" data-forward="transition-05-forward.mp4" data-reverse="transition-05-reverse.mp4" data-anchor="section-05-anchor.webp">
-      <div class="section-copy"><p class="eyebrow">05 / تماسك على الأرض</p><h2 id="feature-06-title">ثباتٌ <span class="highlight">في كل خطوة</span></h2><p class="copy-body">نعل خارجي مانع للانزلاق يمنحك تماسكاً أفضل على الأسطح العملية المختلفة.</p></div>
+      <div class="section-copy"><span class="feature-tag">ثبات السطح</span><h2 id="feature-06-title">ثبات مضاعف <span class="highlight">مضاد للانزلاق</span>.</h2><p class="copy-body">نعل PU بنقوش 3D عميقة يضمن لك التشبث بالأرضيات المبللة والزيتية.</p></div>
     </section>
     <section class="section video-section" aria-labelledby="feature-07-title" data-video="6" data-duration="2.53" data-forward="transition-06-forward.mp4" data-reverse="transition-06-reverse.mp4" data-anchor="section-06-anchor.webp">
-      <div class="section-copy"><p class="eyebrow">06 / راحة تدوم</p><h2 id="feature-07-title">توسيد ذكي <span class="highlight">لكل خطوة</span></h2><p class="copy-body">تصميم نعل مريح يساعد على امتصاص أثر الخطوات لتشعر براحة أكبر خلال ساعات العمل.</p></div>
+      <div class="section-copy"><span class="feature-tag">الراحة اليومية</span><h2 id="feature-07-title">راحة تمتص <span class="highlight">أقسى الصدمات</span>.</h2><p class="copy-body">وسادة هوائية مدمجة لامتصاص الصدمات وتقليل إرهاق المفاصل في نوبات العمل الطويلة.</p></div>
     </section>
     <section class="section video-section" aria-labelledby="feature-08-title" data-video="7" data-duration="3.03" data-forward="transition-07-forward.mp4" data-reverse="transition-07-reverse.mp4" data-anchor="section-07-anchor.webp">
-      <div class="section-copy"><p class="eyebrow">07 / تهوية مستمرة</p><h2 id="feature-08-title">وداعاً للحرارة <span class="highlight">والتعرّق</span></h2><p class="copy-body">نسيج شبكي يسمح بمرور الهواء ليساعد على إبقاء القدمين أكثر انتعاشاً وجفافاً.</p></div>
+      <div class="section-copy"><span class="feature-tag">التهوية والتبريد</span><h2 id="feature-08-title">أقدام جافة <span class="highlight">طوال اليوم</span>.</h2><p class="copy-body">بطانة شبكية متطورة تسمح بتدفق الهواء وتطرد الرطوبة والروائح الكريهة.</p></div>
     </section>
     <section class="section video-section" aria-labelledby="feature-09-title" data-video="8" data-duration="2.53" data-forward="transition-08-forward.mp4" data-reverse="transition-08-reverse.mp4" data-anchor="section-08-anchor.webp">
-      <div class="section-copy"><p class="eyebrow">08 / خفة رياضية</p><h2 id="feature-09-title">قوة في العمل، <span class="highlight">وخفة في الحركة</span></h2><p class="copy-body">وزن يقارب 366 غراماً للحذاء، لتتحرك بحرية أكبر من دون إحساس الحذاء الثقيل.</p></div>
+      <div class="section-copy"><span class="feature-tag">الوزن والرياضة</span><h2 id="feature-09-title">قوة العمل بـ <span class="highlight">خفة الرياضة</span>.</h2><p class="copy-body">وزن خفيف للغاية (~366 غرام) يمنحك حرية حركة كاملة طوال اليوم.</p></div>
     </section>
     <section class="section video-section" aria-labelledby="feature-10-title" data-video="9" data-duration="2.53" data-forward="transition-09-forward.mp4" data-reverse="transition-09-reverse.mp4" data-anchor="section-09-anchor.webp">
-      <div class="section-copy"><p class="eyebrow">09 / معيار أوروبي</p><h2 id="feature-10-title">معايير أوروبية <span class="highlight">للأمان</span></h2><p class="copy-body">مصمم وفق معيار EN ISO 20345 لمتطلبات أحذية السلامة المهنية.</p></div>
+      <div class="section-copy"><span class="feature-tag">المعايير الأوروبية</span><h2 id="feature-10-title">هندسة أمان <span class="highlight">معتمدة</span>.</h2><p class="copy-body">مصمم وفق معايير السلامة الأوروبية (EN ISO 20345) لجودة وموثوقية عالية.</p></div>
     </section>
     <section class="section video-section" aria-labelledby="feature-11-title" data-video="10" data-duration="2.53" data-forward="transition-10-forward.mp4" data-reverse="transition-10-reverse.mp4" data-anchor="section-10-anchor.webp">
-      <div class="section-copy"><p class="eyebrow">10 / بنية متعددة الطبقات</p><h2 id="feature-11-title">هندسة دقيقة، <span class="highlight">حماية متكاملة</span></h2><p class="copy-body">طبقات مصممة لتجمع بين الحماية والراحة والثبات — لتكون مستعداً ليوم العمل.</p></div>
+      <div class="section-copy"><span class="feature-tag">العرض النهائي</span><h2 id="feature-11-title">كل ما تحتاجه في <span class="highlight">حذاء واحد</span>.</h2><p class="copy-body">الحماية، الراحة، الخفة، والسرعة. احمِ نفسك في موقع العمل الآن.</p></div>
     </section>
   </main>
 
   <div id="frame-container" aria-hidden="true"><canvas id="frame-canvas"></canvas></div>
   <div id="gradient-overlay" aria-hidden="true"></div>
   <aside id="sticky-cta" hidden aria-label="إتمام الطلب">
-    <button class="gold-cta" type="button" onclick="scrollToOrderForm()">اطلب الآن - الدفع عند الاستلام</button>
+    <button class="btn-primary-glow" type="button" onclick="scrollToOrderForm()">اطلب الآن - الدفع عند الاستلام</button>
   </aside>
 
   <dialog id="order-dialog" aria-labelledby="order-title">
@@ -420,7 +397,7 @@
           <div class="field"><label for="quantity">الكمية</label><input id="quantity" name="quantity" type="number" min="1" max="10" value="1" required></div>
         </div>
         <p class="order-note">الدفع عند الاستلام. لم يتم ربط هذا النموذج بخدمة استقبال الطلبات بعد.</p>
-        <button class="gold-cta" type="submit">إتمام الطلب</button>
+        <button class="btn-primary-glow" type="submit">إتمام الطلب</button>
         <p id="order-status" role="status" aria-live="polite"></p>
       </form>
     </div>
