@@ -577,6 +577,8 @@
         container.classList.remove('ui-visible');
         container.classList.add('ui-hidden');
       });
+      stickyCta.classList.remove('ui-visible');
+      stickyCta.classList.add('ui-hidden');
     }
 
     function showSettledSectionUi(sectionIndex) {
@@ -584,6 +586,14 @@
         container.classList.remove('ui-visible');
         container.classList.add('ui-hidden');
       });
+      stickyCta.hidden = sectionIndex === 0 || sectionIndex === sections.length - 1;
+      if (stickyCta.hidden) {
+        stickyCta.classList.remove('ui-visible');
+        stickyCta.classList.add('ui-hidden');
+      } else {
+        stickyCta.classList.remove('ui-hidden');
+        stickyCta.classList.add('ui-visible');
+      }
       const activeContainer = sections[sectionIndex]?.querySelector('.ui-container');
       if (!activeContainer) return; // Index 11 is intentionally a silent closing frame.
       activeContainer.classList.remove('ui-hidden');
@@ -597,7 +607,6 @@
       if (!drawAnchor(destination)) drawCover(video);
       story.scrollTop = destination * getSectionHeight();
       currentSection = destination;
-      stickyCta.hidden = destination === 0 || destination === sections.length - 1;
       showSettledSectionUi(destination);
       isScrollingLocked = false;
       activeVideo = null;
