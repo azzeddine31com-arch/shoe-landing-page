@@ -141,7 +141,7 @@
     }
 
     #gradient-overlay.is-dimmed {
-      opacity: .25;
+      opacity: .2;
       transition: opacity .2s ease-out;
     }
 
@@ -162,6 +162,47 @@
     }
 
     .section-copy > * { pointer-events: auto; }
+
+    .fixed-ui-layer {
+      position: fixed;
+      z-index: 30;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    #dynamic-text-container {
+      position: absolute;
+      z-index: 30;
+      inset: auto 0 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-end;
+      width: 100%;
+      min-height: var(--zone-content-height);
+      padding: 0 max(1.25rem, calc((100vw - var(--content-max)) / 2)) calc(1.5rem + var(--cta-reserve) + var(--safe-bottom));
+      direction: rtl;
+      text-align: right;
+      pointer-events: none;
+    }
+
+    .text-hidden { pointer-events: none; }
+    .text-hidden > * { pointer-events: none !important; }
+    .text-hidden .feature-tag, .text-hidden h2, .text-hidden p {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity .3s ease-out, transform .3s ease-out;
+    }
+
+    .text-visible .feature-tag, .text-visible h2, .text-visible p {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .text-visible .feature-tag { transition: opacity .7s cubic-bezier(.16, 1, .3, 1), transform .7s cubic-bezier(.16, 1, .3, 1); }
+    .text-visible h2 { transition: opacity .7s cubic-bezier(.16, 1, .3, 1), transform .7s cubic-bezier(.16, 1, .3, 1); }
+    .text-visible p { transition: opacity .7s cubic-bezier(.16, 1, .3, 1) .15s, transform .7s cubic-bezier(.16, 1, .3, 1) .15s; }
+    .text-visible.technical-section .highlight { color: #00e5ff; }
 
     .ui-container {
       transition: opacity .2s ease-out, transform .2s ease-out;
@@ -288,7 +329,7 @@
 
     .cta-wrapper { width: 100%; margin-top: .75rem; }
 
-    .btn-hero-liquid {
+    .hero-cta-liquid {
       position: relative;
       isolation: isolate;
       display: flex;
@@ -316,7 +357,7 @@
       animation: liquid-background 5s ease-in-out infinite, liquid-glow 2.8s ease-in-out infinite alternate;
     }
 
-    .btn-hero-liquid::before {
+    .hero-cta-liquid::before {
       position: absolute;
       z-index: 0;
       inset: 0;
@@ -327,10 +368,10 @@
       pointer-events: none;
     }
 
-    .btn-hero-liquid .btn-text, .btn-hero-liquid .btn-icon { position: relative; z-index: 1; }
-    .btn-hero-liquid .btn-icon { display: inline-flex; flex: 0 0 auto; }
-    .btn-hero-liquid .btn-icon svg { width: 20px; height: 20px; }
-    .btn-hero-liquid:active { transform: scale(.98); }
+    .hero-cta-liquid .btn-text, .hero-cta-liquid .btn-icon { position: relative; z-index: 1; }
+    .hero-cta-liquid .btn-icon { display: inline-flex; flex: 0 0 auto; }
+    .hero-cta-liquid .btn-icon svg { width: 20px; height: 20px; }
+    .hero-cta-liquid:active { transform: scale(.98); }
 
     @keyframes liquid-background {
       0%, 100% { background-position: 0% 50%; }
@@ -391,25 +432,34 @@
       font-weight: 700;
     }
 
-    .btn-hero-liquid:focus-visible, .btn-sticky-glass:focus-visible, .btn-form-submit:focus-visible,
+    .hero-cta-liquid:focus-visible, .btn-sticky-glass:focus-visible, .btn-form-submit:focus-visible,
     .close-dialog:focus-visible, input:focus-visible, select:focus-visible {
       outline: 3px solid #fff;
       outline-offset: 3px;
     }
 
     #sticky-cta {
-      position: fixed;
+      position: absolute;
       z-index: 40;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      display: flex;
-      justify-content: center;
-      padding: 10px max(18px, calc((100vw - var(--content-max)) / 2)) calc(10px + var(--safe-bottom));
-      background: transparent;
+      right: max(18px, calc((100vw - var(--content-max)) / 2));
+      bottom: calc(10px + var(--safe-bottom));
+      left: max(18px, calc((100vw - var(--content-max)) / 2));
+      width: auto;
+      margin-inline: auto;
+      transition: all .5s cubic-bezier(.4, 0, .2, 1);
     }
 
-    #sticky-cta[hidden] { display: none; }
+    #sticky-cta.hidden-in-hero {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(20px);
+    }
+
+    #sticky-cta.visible-in-scroll {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
 
     #order-dialog {
       width: min(100% - 28px, 530px);
@@ -472,39 +522,39 @@
         <span class="trust-badge">حذاء أمان OBIDER</span>
         <h1 id="hero-title"><span class="highlight">درع لقدميك</span>. خفة في خطوتك.</h1>
         <p class="copy-body">حذاء الأمان OBIDER. حماية فولاذية وكيفلار بتصميم رياضي خفيف.</p>
-        <div class="cta-wrapper"><button class="btn-hero-liquid" type="button" onclick="scrollToOrderForm()"><span class="btn-text">اطلب الآن - الدفع عند الاستلام</span><span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></button></div>
+        <div class="cta-wrapper"><button class="hero-cta-liquid" type="button" onclick="scrollToOrderForm()"><span class="btn-text">اطلب الآن - الدفع عند الاستلام</span><span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></button></div>
       </div>
     </section>
 
-    <section class="section video-section" aria-labelledby="feature-02-title" data-video="1" data-duration="2.12" data-forward="transition-01-forward.mp4" data-reverse="transition-01-reverse.mp4" data-anchor="section-01-anchor.webp">
-      <div class="section-copy ui-container"><span class="feature-tag">نظام الإغلاق السريع</span><h2 id="feature-02-title">اِرتده بـ <span class="highlight">ضغطة واحدة</span>.</h2><p class="copy-body">نظام القرص الدوار (Swivel Buckle) يوفر أربطة سهلة الضغط والتدوير لارتداء سريع وثبات دائم.</p></div>
+    <section class="section video-section" aria-label="نظام الإغلاق السريع" data-video="1" data-duration="2.12" data-forward="transition-01-forward.mp4" data-reverse="transition-01-reverse.mp4" data-anchor="section-01-anchor.webp">
+      <template class="section-copy-template"><span class="feature-tag">نظام الإغلاق السريع</span><h2>اِرتده بـ <span class="highlight">ضغطة واحدة</span>.</h2><p class="copy-body">نظام القرص الدوار (Swivel Buckle) يوفر أربطة سهلة الضغط والتدوير لارتداء سريع وثبات دائم.</p></template>
     </section>
-    <section class="section video-section" aria-labelledby="feature-03-title" data-video="2" data-duration="2.53" data-forward="transition-02-forward.mp4" data-reverse="transition-02-reverse.mp4" data-anchor="section-02-anchor.webp">
-      <div class="section-copy ui-container"><span class="feature-tag">حماية الصدمات</span><h2 id="feature-03-title">مقدمة <span class="highlight">فولاذية</span> لا تُقهر.</h2><p class="copy-body">غطاء صلب يحمي أصابع قدمك من الصدمات وسقوط الأجسام الثقيلة حتى 200 جول.</p></div>
+    <section class="section video-section" aria-label="حماية الصدمات" data-video="2" data-duration="2.53" data-forward="transition-02-forward.mp4" data-reverse="transition-02-reverse.mp4" data-anchor="section-02-anchor.webp">
+      <template class="section-copy-template"><span class="feature-tag">حماية الصدمات</span><h2>مقدمة <span class="highlight">فولاذية</span> لا تُقهر.</h2><p class="copy-body">غطاء صلب يحمي أصابع قدمك من الصدمات وسقوط الأجسام الثقيلة حتى 200 جول.</p></template>
     </section>
-    <section class="section video-section" aria-labelledby="feature-04-title" data-video="3" data-duration="1.73" data-forward="transition-03-forward.mp4" data-reverse="transition-03-reverse.mp4" data-anchor="section-03-anchor.webp">
-      <div class="section-copy ui-container"><span class="feature-tag">بيئات العمل الخطرة</span><h2 id="feature-04-title">امشِ بثقة فوق <span class="highlight">الخطر</span>.</h2><p class="copy-body">نعل متين مجهز لتحدي أسطح البناء والتضاريس الحادة دون اختراق.</p></div>
+    <section class="section video-section" aria-label="بيئات العمل الخطرة" data-video="3" data-duration="1.73" data-forward="transition-03-forward.mp4" data-reverse="transition-03-reverse.mp4" data-anchor="section-03-anchor.webp">
+      <template class="section-copy-template"><span class="feature-tag">بيئات العمل الخطرة</span><h2>امشِ بثقة فوق <span class="highlight">الخطر</span>.</h2><p class="copy-body">نعل متين مجهز لتحدي أسطح البناء والتضاريس الحادة دون اختراق.</p></template>
     </section>
-    <section class="section video-section" aria-labelledby="feature-05-title" data-video="4" data-duration="2.53" data-forward="transition-04-forward.mp4" data-reverse="transition-04-reverse.mp4" data-anchor="section-04-anchor.webp">
-      <div class="section-copy ui-container"><span class="feature-tag">حماية النعل</span><h2 id="feature-05-title">درع <span class="highlight">الكيفلار</span> المضاد للثقب.</h2><p class="copy-body">نعل أوسط مرن من الكيفلار يمنع اختراق المسامير والشظايا بقوة تصل لـ 1100 نيوتن.</p></div>
+    <section class="section video-section" aria-label="حماية النعل" data-video="4" data-duration="2.53" data-forward="transition-04-forward.mp4" data-reverse="transition-04-reverse.mp4" data-anchor="section-04-anchor.webp">
+      <template class="section-copy-template"><span class="feature-tag">حماية النعل</span><h2>درع <span class="highlight">الكيفلار</span> المضاد للثقب.</h2><p class="copy-body">نعل أوسط مرن من الكيفلار يمنع اختراق المسامير والشظايا بقوة تصل لـ 1100 نيوتن.</p></template>
     </section>
-    <section class="section video-section" aria-labelledby="feature-06-title" data-video="5" data-duration="2.53" data-forward="transition-05-forward.mp4" data-reverse="transition-05-reverse.mp4" data-anchor="section-05-anchor.webp">
-      <div class="section-copy ui-container"><span class="feature-tag">ثبات السطح</span><h2 id="feature-06-title">ثبات مضاعف <span class="highlight">مضاد للانزلاق</span>.</h2><p class="copy-body">نعل PU بنقوش 3D عميقة يضمن لك التشبث بالأرضيات المبللة والزيتية.</p></div>
+    <section class="section video-section" aria-label="ثبات السطح" data-video="5" data-duration="2.53" data-forward="transition-05-forward.mp4" data-reverse="transition-05-reverse.mp4" data-anchor="section-05-anchor.webp">
+      <template class="section-copy-template"><span class="feature-tag">ثبات السطح</span><h2>ثبات مضاعف <span class="highlight">مضاد للانزلاق</span>.</h2><p class="copy-body">نعل PU بنقوش 3D عميقة يضمن لك التشبث بالأرضيات المبللة والزيتية.</p></template>
     </section>
-    <section class="section video-section" aria-labelledby="feature-07-title" data-video="6" data-duration="2.53" data-forward="transition-06-forward.mp4" data-reverse="transition-06-reverse.mp4" data-anchor="section-06-anchor.webp">
-      <div class="section-copy ui-container"><span class="feature-tag">الراحة اليومية</span><h2 id="feature-07-title">راحة تمتص <span class="highlight">أقسى الصدمات</span>.</h2><p class="copy-body">وسادة هوائية مدمجة لامتصاص الصدمات وتقليل إرهاق المفاصل في نوبات العمل الطويلة.</p></div>
+    <section class="section video-section" aria-label="الراحة اليومية" data-video="6" data-duration="2.53" data-forward="transition-06-forward.mp4" data-reverse="transition-06-reverse.mp4" data-anchor="section-06-anchor.webp">
+      <template class="section-copy-template"><span class="feature-tag">الراحة اليومية</span><h2>راحة تمتص <span class="highlight">أقسى الصدمات</span>.</h2><p class="copy-body">وسادة هوائية مدمجة لامتصاص الصدمات وتقليل إرهاق المفاصل في نوبات العمل الطويلة.</p></template>
     </section>
-    <section class="section video-section" aria-labelledby="feature-08-title" data-video="7" data-duration="3.03" data-forward="transition-07-forward.mp4" data-reverse="transition-07-reverse.mp4" data-anchor="section-07-anchor.webp">
-      <div class="section-copy ui-container"><span class="feature-tag">التهوية والتبريد</span><h2 id="feature-08-title">أقدام جافة <span class="highlight">طوال اليوم</span>.</h2><p class="copy-body">بطانة شبكية متطورة تسمح بتدفق الهواء وتطرد الرطوبة والروائح الكريهة.</p></div>
+    <section class="section video-section" aria-label="التهوية والتبريد" data-video="7" data-duration="3.03" data-forward="transition-07-forward.mp4" data-reverse="transition-07-reverse.mp4" data-anchor="section-07-anchor.webp">
+      <template class="section-copy-template"><span class="feature-tag">التهوية والتبريد</span><h2>أقدام جافة <span class="highlight">طوال اليوم</span>.</h2><p class="copy-body">بطانة شبكية متطورة تسمح بتدفق الهواء وتطرد الرطوبة والروائح الكريهة.</p></template>
     </section>
-    <section class="section video-section" aria-labelledby="feature-09-title" data-video="8" data-duration="2.53" data-forward="transition-08-forward.mp4" data-reverse="transition-08-reverse.mp4" data-anchor="section-08-anchor.webp">
-      <div class="section-copy ui-container"><span class="feature-tag">الوزن والرياضة</span><h2 id="feature-09-title">قوة العمل بـ <span class="highlight">خفة الرياضة</span>.</h2><p class="copy-body">وزن خفيف للغاية (~366 غرام) يمنحك حرية حركة كاملة طوال اليوم.</p></div>
+    <section class="section video-section" aria-label="الوزن والرياضة" data-video="8" data-duration="2.53" data-forward="transition-08-forward.mp4" data-reverse="transition-08-reverse.mp4" data-anchor="section-08-anchor.webp">
+      <template class="section-copy-template"><span class="feature-tag">الوزن والرياضة</span><h2>قوة العمل بـ <span class="highlight">خفة الرياضة</span>.</h2><p class="copy-body">وزن خفيف للغاية (~366 غرام) يمنحك حرية حركة كاملة طوال اليوم.</p></template>
     </section>
-    <section class="section video-section technical-section" aria-labelledby="feature-10-title" data-video="9" data-duration="2.53" data-forward="transition-09-forward.mp4" data-reverse="transition-09-reverse.mp4" data-anchor="section-09-anchor.webp">
-      <div class="section-copy ui-container"><span class="feature-tag">المعايير الأوروبية</span><h2 id="feature-10-title">هندسة أمان <span class="highlight">معتمدة</span>.</h2><p class="copy-body">مصمم وفق معايير السلامة الأوروبية (EN ISO 20345) لجودة وموثوقية عالية.</p></div>
+    <section class="section video-section technical-section" aria-label="المعايير الأوروبية" data-video="9" data-duration="2.53" data-forward="transition-09-forward.mp4" data-reverse="transition-09-reverse.mp4" data-anchor="section-09-anchor.webp">
+      <template class="section-copy-template"><span class="feature-tag">المعايير الأوروبية</span><h2>هندسة أمان <span class="highlight">معتمدة</span>.</h2><p class="copy-body">مصمم وفق معايير السلامة الأوروبية (EN ISO 20345) لجودة وموثوقية عالية.</p></template>
     </section>
-    <section class="section video-section technical-section" aria-labelledby="feature-11-title" data-video="10" data-duration="2.53" data-forward="transition-10-forward.mp4" data-reverse="transition-10-reverse.mp4" data-anchor="section-10-anchor.webp">
-      <div class="section-copy ui-container"><span class="feature-tag">العرض النهائي</span><h2 id="feature-11-title">كل ما تحتاجه في <span class="highlight">حذاء واحد</span>.</h2><p class="copy-body">الحماية، الراحة، الخفة، والسرعة. احمِ نفسك في موقع العمل الآن.</p></div>
+    <section class="section video-section technical-section" aria-label="العرض النهائي" data-video="10" data-duration="2.53" data-forward="transition-10-forward.mp4" data-reverse="transition-10-reverse.mp4" data-anchor="section-10-anchor.webp">
+      <template class="section-copy-template"><span class="feature-tag">العرض النهائي</span><h2>كل ما تحتاجه في <span class="highlight">حذاء واحد</span>.</h2><p class="copy-body">الحماية، الراحة، الخفة، والسرعة. احمِ نفسك في موقع العمل الآن.</p></template>
     </section>
     <section class="section video-section silent-section" aria-label="المشهد الختامي" data-index="11" data-title="" data-body="" data-cta="false" data-video="11" data-duration="3.22" data-forward="transition-11-forward.mp4" data-reverse="transition-11-reverse.mp4" data-anchor="section-11-anchor.webp"></section>
   </main>
@@ -512,9 +562,10 @@
   <div id="frame-container" aria-hidden="true"><canvas id="frame-canvas"></canvas></div>
   <canvas id="particle-canvas" aria-hidden="true"></canvas>
   <div id="gradient-overlay" aria-hidden="true"></div>
-  <aside id="sticky-cta" hidden aria-label="إتمام الطلب">
-    <button class="btn-sticky-glass" type="button" onclick="scrollToOrderForm()">اطلب الآن - الدفع عند الاستلام</button>
-  </aside>
+  <div class="fixed-ui-layer" aria-label="واجهة الشراء">
+    <div id="dynamic-text-container" class="text-hidden" aria-live="polite" aria-atomic="true" aria-hidden="true"></div>
+    <button id="sticky-cta" class="btn-sticky-glass hidden-in-hero" type="button" aria-hidden="true" tabindex="-1" onclick="scrollToOrderForm()">اطلب الآن - الدفع عند الاستلام</button>
+  </div>
 
   <dialog id="order-dialog" aria-labelledby="order-title">
     <div class="order-scroll">
@@ -553,7 +604,8 @@
     const gradientOverlay = document.querySelector('#gradient-overlay');
     const sections = Array.from(story.querySelectorAll('.section'));
     const heroImage = document.querySelector('.hero img');
-    const uiContainers = Array.from(story.querySelectorAll('.ui-container'));
+    const heroCopy = document.querySelector('.hero-copy');
+    const dynamicTextContainer = document.querySelector('#dynamic-text-container');
     const stickyCta = document.querySelector('#sticky-cta');
     const orderDialog = document.querySelector('#order-dialog');
     let currentSection = 0;
@@ -767,29 +819,49 @@
     }
 
     function hideUiDuringTransition() {
-      uiContainers.forEach((container) => {
-        container.classList.remove('ui-visible');
-        container.classList.add('ui-hidden');
-      });
+      heroCopy.classList.remove('ui-visible');
+      heroCopy.classList.add('ui-hidden');
+      dynamicTextContainer.className = 'text-hidden';
+      dynamicTextContainer.setAttribute('aria-hidden', 'true');
+    }
+
+    function prepareSectionCopy(sectionIndex) {
+      dynamicTextContainer.replaceChildren();
+      const template = sections[sectionIndex]?.querySelector('.section-copy-template');
+      if (!template) return;
+      const fragment = template.content.cloneNode(true);
+      const heading = fragment.querySelector('h2');
+      const description = fragment.querySelector('p');
+      if (heading) heading.id = 'section-title';
+      if (description) description.id = 'section-desc';
+      dynamicTextContainer.append(fragment);
     }
 
     function revealSectionUi(sectionIndex) {
-      uiContainers.forEach((container) => {
-        container.classList.remove('ui-visible');
-        container.classList.add('ui-hidden');
-      });
-      stickyCta.hidden = sectionIndex === 0 || sectionIndex === sections.length - 1;
-      if (stickyCta.hidden) {
-        stickyCta.classList.remove('ui-visible');
-        stickyCta.classList.add('ui-hidden');
+      const isHero = sectionIndex === 0;
+      if (isHero) {
+        heroCopy.classList.remove('ui-hidden');
+        heroCopy.classList.add('ui-visible');
       } else {
-        stickyCta.classList.remove('ui-hidden');
-        stickyCta.classList.add('ui-visible');
+        heroCopy.classList.remove('ui-visible');
+        heroCopy.classList.add('ui-hidden');
       }
-      const activeContainer = sections[sectionIndex]?.querySelector('.ui-container');
-      if (!activeContainer) return; // Index 11 is intentionally a silent closing frame.
-      activeContainer.classList.remove('ui-hidden');
-      activeContainer.classList.add('ui-visible');
+
+      const hasFeatureCopy = sectionIndex > 0 && sectionIndex < sections.length - 1
+        && Boolean(dynamicTextContainer.querySelector('#section-title'));
+      if (hasFeatureCopy) {
+        const isTechnicalSlide = sections[sectionIndex].classList.contains('technical-section');
+        dynamicTextContainer.className = isTechnicalSlide ? 'text-visible technical-section' : 'text-visible';
+      } else {
+        dynamicTextContainer.className = 'text-hidden';
+      }
+      dynamicTextContainer.setAttribute('aria-hidden', String(!hasFeatureCopy));
+
+      const showStickyCta = sectionIndex > 0 && sectionIndex < sections.length - 1;
+      stickyCta.classList.toggle('hidden-in-hero', !showStickyCta);
+      stickyCta.classList.toggle('visible-in-scroll', showStickyCta);
+      stickyCta.setAttribute('aria-hidden', String(!showStickyCta));
+      stickyCta.tabIndex = showStickyCta ? 0 : -1;
     }
 
     function triggerTextReveal(destination, transitionId) {
@@ -868,6 +940,7 @@
       const destination = Math.max(0, Math.min(sections.length - 1, origin + step));
       if (destination === origin) return;
       hideUiDuringTransition();
+      prepareSectionCopy(destination);
       gradientOverlay.classList.add('is-dimmed');
       stopHeroParticles();
       isScrollingLocked = true;
@@ -889,6 +962,7 @@
     window.addEventListener('wheel', handleWheel, { passive: false });
     window.addEventListener('touchstart', (event) => {
       if (orderDialog.open) return;
+      if (event.target instanceof Element && event.target.closest('button, a, input, select, textarea')) { touchStart = null; return; }
       if (!event.touches.length) return;
       event.preventDefault();
       touchStart = { x: event.touches[0].clientX, y: event.touches[0].clientY };
@@ -905,9 +979,8 @@
       }
     }, { passive: false });
     window.addEventListener('touchend', (event) => {
-      if (orderDialog.open) return;
+      if (orderDialog.open || !touchStart || !event.changedTouches.length) return;
       event.preventDefault();
-      if (!touchStart || !event.changedTouches.length) return;
       const deltaY = touchStart.y - event.changedTouches[0].clientY;
       const deltaX = touchStart.x - event.changedTouches[0].clientX;
       touchStart = null;
