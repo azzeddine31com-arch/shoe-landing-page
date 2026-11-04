@@ -442,7 +442,7 @@
       text-align: center;
     }
 
-    .sticky-floating-pill:focus-visible, .gf-submit:focus-visible,
+    .sticky-floating-pill:focus-visible, .image-backed-cta:focus-visible,
     .close-dialog:focus-visible, .gf-qty-btn:focus-visible {
       outline: 3px solid #fff;
       outline-offset: 3px;
@@ -926,61 +926,45 @@
     }
 
     /* cta + footer ------------------------------------------------------- */
-    .gf-submit {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      min-height: clamp(48px, 11.4cqw, 66px);
-      margin-top: 4.6cqw;
-      padding: 6px 14px;
-      overflow: hidden;
-      border: none;
-      border-radius: 5px;
-      background: #e6e7e4;
-      box-shadow: none;
-      color: #111111;
-      cursor: pointer;
-      font-family: var(--font-headline);
-      font-size: 20px;
-      font-weight: 900;
-      line-height: 1.3;
-      transition: transform .16s ease;
-    }
-
-    /* the paper plaque is a real image, the label sits in front of it */
-    .gf-submit-plate {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: fill;
-      pointer-events: none;
-      user-select: none;
-      filter: brightness(1.12) contrast(.96);
-    }
-
-    .gf-submit-label {
-      position: relative;
-      z-index: 1;
+    /* the cut-out paper plaque is the background image, label + icon sit on top */
+    .image-backed-cta {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 12px;
+      width: 100%;
+      max-width: 420px;
+      height: 65px;
+      margin: 4.6cqw auto 0;
+      padding: 0 10px;
+      border: none;
+      outline: none;
+      background-color: transparent;
+      background-image: url('Form/assets/button-texture.webp');
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      color: #111111;
+      cursor: pointer;
+      font-family: var(--font-headline);
+      font-size: 22px;
+      font-weight: 900;
+      line-height: 1;
+      filter: brightness(1.1) contrast(.97);
+      transition: transform .2s ease;
     }
 
-    .gf-submit:hover .gf-submit-plate { filter: brightness(1.16) contrast(.96); }
+    .image-backed-cta:active { transform: scale(.97); }
 
-    .gf-submit:active { transform: translateY(1px); }
-
-    .gf-submit .gf-icon {
+    .image-backed-cta .gf-icon {
       flex: 0 0 auto;
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       color: #111111;
       opacity: 1;
-      stroke-width: 1.7;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     .trust-badges-container {
@@ -1235,12 +1219,12 @@
               </div>
             </div>
 
-            <button class="gf-submit" type="submit">
-              <img class="gf-submit-plate" src="Form/assets/button-texture.webp" alt="" width="1528" height="287" aria-hidden="true" decoding="async">
-              <span class="gf-submit-label">
-                <span>إتمام الطلب</span>
-                <svg class="gf-icon" aria-hidden="true"><use href="#i-plane"/></svg>
-              </span>
+            <button class="image-backed-cta" type="submit">
+              <span>إتمام الطلب</span>
+              <svg class="gf-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
             </button>
 
             <div class="trust-badges-container">
