@@ -8,7 +8,7 @@
   <link rel="preload" href="Main%20video/hero-1080-edc27943d1ea.avif" as="image" type="image/avif" fetchpriority="high">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@600;700&family=Tajawal:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@600;700&family=Tajawal:wght@400;500&family=Titan+One&display=swap" rel="stylesheet">
   <style>
     :root {
       color-scheme: dark;
@@ -418,10 +418,61 @@
       50% { transform: translateY(5px) rotate(45deg); }
     }
 
-    /* glass surface pill (GlassSurface-style: layered tint + backdrop blur + specular edge) */
-    .sticky-floating-pill {
+    /* GlassSurface (React Bits) recreated in CSS:
+       tint + backdrop blur/saturation + sheen layer + rim layer + soft stacked shadows */
+    .glass-surface {
       position: relative;
       isolation: isolate;
+      overflow: hidden;
+      background: rgba(255, 255, 255, .1);
+      -webkit-backdrop-filter: blur(12px) saturate(1.4) brightness(1.04);
+      backdrop-filter: blur(12px) saturate(1.4) brightness(1.04);
+      box-shadow:
+        inset 0 1px 0 0 rgba(255, 255, 255, .3),
+        inset 0 -1px 0 0 rgba(255, 255, 255, .08),
+        inset 0 0 2px 1px rgba(255, 255, 255, .26),
+        inset 0 0 12px 3px rgba(255, 255, 255, .1),
+        0 4px 16px rgba(17, 17, 26, .1),
+        0 8px 24px rgba(17, 17, 26, .1),
+        0 16px 56px rgba(17, 17, 26, .12);
+    }
+
+    /* glass-surface__sheen */
+    .glass-surface::before {
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg,
+        rgba(255, 255, 255, .16) 0%,
+        transparent 42%,
+        transparent 64%,
+        rgba(255, 255, 255, .06) 100%);
+      content: "";
+      pointer-events: none;
+    }
+
+    /* glass-surface__rim */
+    .glass-surface::after {
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      padding: 3px;
+      border-radius: inherit;
+      background: linear-gradient(150deg,
+        rgba(255, 255, 255, .34),
+        rgba(255, 255, 255, .03) 45%,
+        rgba(255, 255, 255, .02) 60%,
+        rgba(255, 255, 255, .18));
+      content: "";
+      pointer-events: none;
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    }
+
+    .sticky-floating-pill {
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -430,20 +481,8 @@
       height: 56px;
       margin: 0;
       padding: 8px 18px;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, .28);
+      border: 1px solid rgba(255, 255, 255, .16);
       border-radius: 999px;
-      background: linear-gradient(180deg,
-        rgba(255, 255, 255, .26) 0%,
-        rgba(255, 255, 255, .07) 46%,
-        rgba(255, 255, 255, .14) 100%);
-      backdrop-filter: blur(11px) saturate(1.7) brightness(1.06);
-      -webkit-backdrop-filter: blur(11px) saturate(1.7) brightness(1.06);
-      box-shadow:
-        0 12px 32px rgba(0, 0, 0, .34),
-        inset 0 1px 0 rgba(255, 255, 255, .6),
-        inset 0 -1px 0 rgba(255, 255, 255, .18),
-        inset 0 0 26px rgba(255, 150, 70, .16);
       color: #fff;
       cursor: pointer;
       font-family: var(--font-headline);
@@ -454,22 +493,47 @@
       text-shadow: 0 1px 3px rgba(0, 0, 0, .45);
     }
 
-    .sticky-floating-pill::after {
+    /* floating "?" trigger: same glass surface as the pinned CTA */
+    #faq-fab {
       position: absolute;
-      z-index: -1;
-      inset: 0;
-      border-radius: inherit;
-      background:
-        radial-gradient(120% 92% at 18% 0%, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 58%),
-        radial-gradient(92% 130% at 88% 108%, rgba(255, 255, 255, .2), rgba(255, 255, 255, 0) 62%);
-      content: "";
-      mix-blend-mode: screen;
-      opacity: .75;
-      pointer-events: none;
+      top: calc(14px + env(safe-area-inset-top, 0px));
+      right: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      padding: 0 0 3px;
+      border: 1px solid rgba(255, 255, 255, .22);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .15);
+      color: #fff;
+      cursor: pointer;
+      font-family: 'Titan One', var(--font-headline), sans-serif;
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 1;
+      pointer-events: auto;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, .45);
+      transition: opacity .5s cubic-bezier(.4, 0, .2, 1), transform .5s cubic-bezier(.4, 0, .2, 1);
     }
 
+    #faq-fab.hidden-in-hero {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-12px) scale(.94);
+    }
+
+    #faq-fab.visible-in-scroll {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0) scale(1);
+    }
+
+    #faq-fab:active.visible-in-scroll { transform: translateY(0) scale(.95); }
+
     .sticky-floating-pill:focus-visible, .image-backed-cta:focus-visible,
-    .close-dialog:focus-visible, .gf-qty-btn:focus-visible {
+    #faq-fab:focus-visible, .close-dialog:focus-visible, .gf-qty-btn:focus-visible {
       outline: 3px solid #fff;
       outline-offset: 3px;
     }
@@ -499,7 +563,8 @@
     #sticky-cta:active.visible-in-scroll { transform: translateY(0) scale(.985); }
 
     /* ---------- Order dialog · torn-paper grunge form ---------- */
-    #order-dialog {
+    #order-dialog,
+    #faq-dialog {
       width: min(100% - 16px, 560px);
       max-width: 560px;
       max-height: 96svh;
@@ -511,14 +576,16 @@
       color: #fff;
     }
 
-    #order-dialog[open] { animation: dialog-in .3s cubic-bezier(.2, .8, .2, 1) both; }
+    #order-dialog[open],
+    #faq-dialog[open] { animation: dialog-in .3s cubic-bezier(.2, .8, .2, 1) both; }
 
     @keyframes dialog-in {
       from { opacity: 0; transform: translateY(12px) scale(.985); }
       to { opacity: 1; transform: none; }
     }
 
-    #order-dialog::backdrop {
+    #order-dialog::backdrop,
+    #faq-dialog::backdrop {
       background:
         linear-gradient(rgba(4, 5, 8, .78), rgba(4, 5, 8, .9)),
         url('Form/assets/backdrop.webp') center / cover no-repeat;
@@ -1043,6 +1110,104 @@
 
     #order-status:empty { display: none; }
 
+    /* ---------- FAQ card ---------- */
+    .faq-head {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.4cqw;
+      margin-bottom: 4.6cqw;
+      text-align: center;
+    }
+
+    .faq-title {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2cqw;
+      margin: 0;
+      color: #fff;
+      font-family: var(--font-headline);
+      font-size: clamp(19px, 5.6cqw, 32px);
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    .faq-title-glyph {
+      color: #ffb14d;
+      font-family: 'Titan One', var(--font-headline), sans-serif;
+      font-size: 1.15em;
+      font-weight: 400;
+      line-height: 1;
+      text-shadow: 0 0 18px rgba(255, 177, 77, .45);
+    }
+
+    .faq-sub {
+      margin: 0;
+      color: #a9b0b9;
+      font-size: clamp(11px, 2.9cqw, 16px);
+      line-height: 1.55;
+    }
+
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3.2cqw;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .faq-item {
+      padding: 3.2cqw 3.6cqw;
+      border: 1px solid rgba(198, 204, 212, .26);
+      border-radius: 1.6cqw;
+      background: rgba(255, 255, 255, .028);
+    }
+
+    .faq-step {
+      display: flex;
+      align-items: center;
+      gap: 1.2cqw;
+      margin-bottom: 1.2cqw;
+      color: #ffb14d;
+      font-family: var(--font-headline);
+      font-size: clamp(9.5px, 2.4cqw, 13px);
+      font-weight: 700;
+      opacity: .92;
+    }
+
+    .faq-step::before {
+      color: #ffb14d;
+      content: "?";
+      font-family: 'Titan One', var(--font-headline), sans-serif;
+      font-size: 1.25em;
+      font-weight: 400;
+      line-height: 1;
+    }
+
+    .faq-q {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.6cqw;
+      margin: 0 0 1.6cqw;
+      color: #fff;
+      font-family: var(--font-headline);
+      font-size: clamp(13px, 3.4cqw, 19px);
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    .faq-a {
+      margin: 0;
+      color: #c3c9d1;
+      font-size: clamp(12px, 3.05cqw, 16px);
+      font-weight: 400;
+      line-height: 1.85;
+    }
+
+    .faq-a .good { color: #4dff4d; font-weight: 700; }
+
     @media (max-width: 380px) {
       .section-copy { padding-right: 18px; padding-left: 18px; }
       .close-dialog { top: 8px; left: 8px; width: 30px; height: 30px; font-size: 17px; }
@@ -1109,7 +1274,8 @@
   <div id="gradient-overlay" aria-hidden="true"></div>
   <div class="fixed-ui-layer" aria-label="واجهة الشراء">
     <div id="dynamic-text-container" class="text-stages" aria-live="polite" aria-atomic="true" aria-hidden="true"></div>
-    <button id="sticky-cta" class="sticky-floating-pill hidden-in-hero" type="button" aria-hidden="true" tabindex="-1" onclick="scrollToOrderForm()">اطلب الآن - الدفع عند الاستلام</button>
+    <button id="sticky-cta" class="sticky-floating-pill glass-surface hidden-in-hero" type="button" aria-hidden="true" tabindex="-1" onclick="scrollToOrderForm()">اطلب الآن - الدفع عند الاستلام</button>
+    <button id="faq-fab" class="glass-surface hidden-in-hero" type="button" aria-label="الأسئلة الشائعة" aria-hidden="true" tabindex="-1" onclick="openFaq()">?</button>
   </div>
 
   <dialog id="order-dialog" aria-labelledby="order-title">
@@ -1275,6 +1441,42 @@
       </div>
     </div>
   </dialog>
+  <dialog id="faq-dialog" aria-labelledby="faq-title">
+    <div class="order-shell">
+      <button class="close-dialog" type="button" aria-label="إغلاق" onclick="closeFaq()">×</button>
+      <div class="order-scroll">
+        <div class="grunge-card">
+          <div class="faq-head">
+            <h2 class="faq-title" id="faq-title"><span class="faq-title-glyph">?</span>الأسئلة الشائعة</h2>
+            <p class="faq-sub">أجوبة سريعة على أكثر ما يسأل عنه عملاؤنا قبل الطلب.</p>
+          </div>
+
+          <ul class="faq-list">
+            <li class="faq-item">
+              <span class="faq-step">السؤال الأول</span>
+              <h3 class="faq-q">هل الحذاء ثقيل أثناء المشي؟</h3>
+              <p class="faq-a">لا، بفضل طبقة الكيفلار والمواد الحديثة، الحذاء خفيف جداً ومريح طوال اليوم ولن يسبب لك آلام الظهر.</p>
+            </li>
+            <li class="faq-item">
+              <span class="faq-step">السؤال الثاني</span>
+              <h3 class="faq-q">كيف أختار المقاس المناسب؟</h3>
+              <p class="faq-a">المقاسات مضبوطة بدقة ومعايير عالمية. فقط اختر مقاسك الرياضي الذي تلبسه في العادة.</p>
+            </li>
+            <li class="faq-item">
+              <span class="faq-step">السؤال الثالث</span>
+              <h3 class="faq-q">هل يمكنني الدفع عند الاستلام؟</h3>
+              <p class="faq-a">نعم، الدفع يكون <span class="good">يداً بيد</span> بعد استلام وتفقد الحذاء بنفسك.</p>
+            </li>
+            <li class="faq-item">
+              <span class="faq-step">السؤال الرابع</span>
+              <h3 class="faq-q">متى يصلني الطلب؟</h3>
+              <p class="faq-a">التوصيل سريع جداً لجميع الولايات (58 ولاية) ويستغرق من 2 إلى 4 أيام عمل كأقصى حد.</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </dialog>
 
   <script>
     const story = document.querySelector('#story');
@@ -1290,6 +1492,8 @@
     const heroCtaContainer = document.querySelector('.hero-cta-container');
     const dynamicTextContainer = document.querySelector('#dynamic-text-container');
     const stickyCta = document.querySelector('#sticky-cta');
+    const faqFab = document.querySelector('#faq-fab');
+    const faqDialog = document.querySelector('#faq-dialog');
     const orderDialog = document.querySelector('#order-dialog');
     let currentSection = 0;
     let activeVideo = null;
@@ -1544,6 +1748,12 @@
       stickyCta.classList.toggle('visible-in-scroll', showStickyCta);
       stickyCta.setAttribute('aria-hidden', String(!showStickyCta));
       stickyCta.tabIndex = showStickyCta ? 0 : -1;
+      if (faqFab) {
+        faqFab.classList.toggle('hidden-in-hero', !showStickyCta);
+        faqFab.classList.toggle('visible-in-scroll', showStickyCta);
+        faqFab.setAttribute('aria-hidden', String(!showStickyCta));
+        faqFab.tabIndex = showStickyCta ? 0 : -1;
+      }
       heroCtaContainer?.classList.toggle('fade-out', !isHero);
     }
 
@@ -1724,6 +1934,21 @@
       else orderDialog.removeAttribute('open');
       if (lastOrderTrigger && typeof lastOrderTrigger.focus === 'function') lastOrderTrigger.focus();
       if (currentSection === 0 && !isScrollingLocked) startHeroParticles();
+    }
+
+    let lastFaqTrigger = null;
+
+    function openFaq() {
+      lastFaqTrigger = document.activeElement;
+      if (typeof faqDialog.showModal === 'function') faqDialog.showModal();
+      else faqDialog.setAttribute('open', '');
+      window.setTimeout(() => document.querySelector('#faq-dialog .close-dialog').focus(), 0);
+    }
+
+    function closeFaq() {
+      if (typeof faqDialog.close === 'function') faqDialog.close();
+      else faqDialog.removeAttribute('open');
+      if (lastFaqTrigger && typeof lastFaqTrigger.focus === 'function') lastFaqTrigger.focus();
     }
 
     orderDialog.addEventListener('close', () => {
