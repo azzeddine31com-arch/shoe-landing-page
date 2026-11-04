@@ -677,7 +677,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 1.2cqw;
+      gap: 8px;
       margin-bottom: 2.6cqw;
       color: #fff;
       font-family: var(--font-headline);
@@ -687,7 +687,8 @@
       text-align: center;
     }
 
-    .gf-legend .req { color: #ff8a33; font-size: .85em; font-weight: 700; }
+    .gf-legend-text { display: inline-block; }
+    .gf-legend .req { color: #ff8a33; font-size: .85em; font-weight: 700; line-height: 1; }
 
     .gf-legend .gf-icon {
       width: clamp(15px, 4.2cqw, 23px);
@@ -864,7 +865,7 @@
       gap: .6cqw;
     }
 
-    .gf-ticket-col:last-child { gap: 1.1cqw; }
+    .gf-ticket-col--old { gap: 1.1cqw; }
 
     .gf-ticket-label {
       color: #2a2b2f;
@@ -913,16 +914,15 @@
     .gf-cur { font-size: .56em; font-weight: 600; letter-spacing: 0; }
 
     .gf-ticket-save {
-      padding: .35cqw 2cqw;
-      border-radius: .9cqw;
-      background: #f0a765;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, .18);
+      padding: .55cqw 2.8cqw;
+      background-color: #ffb366;
+      clip-path: polygon(5% 0%, 100% 5%, 95% 100%, 0% 95%);
       color: #141414;
       font-size: clamp(9.5px, 2.5cqw, 14px);
       font-weight: 700;
-      line-height: 1.6;
+      line-height: 1.65;
       white-space: nowrap;
-      transform: rotate(-1.6deg);
+      transform: rotate(-3deg);
     }
 
     /* cta + footer ------------------------------------------------------- */
@@ -936,21 +936,21 @@
       margin-top: 4.6cqw;
       padding: 1.6cqw 4cqw;
       border: 0;
-      border-radius: clamp(7px, 1.4cqw, 12px);
-      background: #c9cecd url('Form/assets/button-texture.webp') center / 100% 100% no-repeat;
-      box-shadow: 0 10px 22px rgba(0, 0, 0, .45);
+      border-radius: 8px;
+      background: #e2dbd0;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, .35);
       color: #0b0c10;
       cursor: pointer;
       font-family: var(--font-headline);
       font-size: clamp(15px, 4.2cqw, 24px);
-      font-weight: 700;
-      transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+      font-weight: 900;
+      transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease;
     }
 
-    .gf-submit:hover { filter: brightness(1.05); }
+    .gf-submit:hover { background: #e8e2d9; }
 
     .gf-submit:active {
-      box-shadow: 0 6px 14px rgba(0, 0, 0, .4);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, .32);
       transform: translateY(1px) scale(.995);
     }
 
@@ -959,7 +959,7 @@
       height: clamp(19px, 5.4cqw, 30px);
       color: #0b0c10;
       opacity: 1;
-      stroke-width: 1.5;
+      stroke-width: 1.9;
     }
 
     .gf-foot {
@@ -1136,7 +1136,8 @@
             <div class="gf-group" role="radiogroup" aria-label="اللون">
               <div class="gf-legend" aria-hidden="true">
                 <svg class="gf-icon"><use href="#i-palette"/></svg>
-                <span>اللون<span class="req">*</span></span>
+                <span class="gf-legend-text">اللون</span>
+                <span class="req">*</span>
               </div>
               <div class="gf-swatches">
                 <label class="gf-swatch" title="أبيض">
@@ -1160,7 +1161,8 @@
             <div class="gf-group" role="radiogroup" aria-label="المقاس">
               <div class="gf-legend" aria-hidden="true">
                 <svg class="gf-icon"><use href="#i-ruler"/></svg>
-                <span>المقاس<span class="req">*</span></span>
+                <span class="gf-legend-text">المقاس</span>
+                <span class="req">*</span>
               </div>
               <div class="gf-sizes">
                 <label class="gf-size"><input type="radio" name="size" value="40" required><span>40</span></label>
@@ -1175,7 +1177,8 @@
             <div class="gf-group" role="group" aria-labelledby="gf-qty-legend">
               <div class="gf-legend" id="gf-qty-legend">
                 <svg class="gf-icon" aria-hidden="true"><use href="#i-box"/></svg>
-                <span>الكمية<span class="req" aria-hidden="true">*</span></span>
+                <span class="gf-legend-text">الكمية</span>
+                <span class="req" aria-hidden="true">*</span>
               </div>
               <div class="gf-qty">
                 <button class="gf-qty-btn" type="button" data-step="-1" aria-label="تقليل الكمية">−</button>
@@ -1184,15 +1187,15 @@
               </div>
             </div>
 
-            <div class="gf-ticket">
-              <div class="gf-ticket-col">
-                <span class="gf-ticket-label">السعر بعد التخفيض</span>
-                <span class="gf-ticket-now"><b data-price-now>2,900</b><span class="gf-cur">دج</span></span>
-              </div>
-              <div class="gf-ticket-col">
+            <div class="gf-ticket" dir="rtl">
+              <div class="gf-ticket-col gf-ticket-col--old">
                 <span class="gf-ticket-label">السعر الأصلي</span>
                 <span class="gf-ticket-old"><b data-price-old>4,800</b><span class="gf-cur">دج</span></span>
                 <span class="gf-ticket-save">وفر <b data-price-save>1,900</b> دج</span>
+              </div>
+              <div class="gf-ticket-col gf-ticket-col--now">
+                <span class="gf-ticket-label">السعر بعد التخفيض</span>
+                <span class="gf-ticket-now"><b data-price-now>2,900</b><span class="gf-cur">دج</span></span>
               </div>
             </div>
 
