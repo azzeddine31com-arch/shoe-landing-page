@@ -165,7 +165,7 @@
 
     .fixed-ui-layer {
       position: fixed;
-      z-index: 30;
+      z-index: 50;
       inset: 0;
       pointer-events: none;
     }
@@ -174,10 +174,8 @@
       position: absolute;
       z-index: 30;
       inset: auto 0 0;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: flex-end;
+      display: grid;
+      grid-template-areas: "stage";
       width: 100%;
       min-height: var(--zone-content-height);
       padding: 0 max(1.25rem, calc((100vw - var(--content-max)) / 2)) calc(1.5rem + var(--cta-reserve) + var(--safe-bottom));
@@ -186,23 +184,38 @@
       pointer-events: none;
     }
 
-    .text-hidden { pointer-events: none; }
-    .text-hidden > * { pointer-events: none !important; }
-    .text-hidden .feature-tag, .text-hidden h2, .text-hidden p {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: opacity .3s ease-out, transform .3s ease-out;
+    .dynamic-text-stage {
+      grid-area: stage;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-end;
+      width: 100%;
+      min-height: 0;
+      pointer-events: none;
+      will-change: opacity, transform;
     }
 
-    .text-visible .feature-tag, .text-visible h2, .text-visible p {
+    .text-stage-hidden-bottom {
+      opacity: 0;
+      transform: translateY(40px);
+      pointer-events: none;
+    }
+
+    .text-stage-visible {
       opacity: 1;
       transform: translateY(0);
+      transition: opacity .6s cubic-bezier(.2, .8, .2, 1), transform .6s cubic-bezier(.2, .8, .2, 1);
     }
 
-    .text-visible .feature-tag { transition: opacity .7s cubic-bezier(.16, 1, .3, 1), transform .7s cubic-bezier(.16, 1, .3, 1); }
-    .text-visible h2 { transition: opacity .7s cubic-bezier(.16, 1, .3, 1), transform .7s cubic-bezier(.16, 1, .3, 1); }
-    .text-visible p { transition: opacity .7s cubic-bezier(.16, 1, .3, 1) .15s, transform .7s cubic-bezier(.16, 1, .3, 1) .15s; }
-    .text-visible.technical-section .highlight { color: #00e5ff; }
+    .text-stage-hidden-top {
+      opacity: 0;
+      transform: translateY(-40px);
+      transition: opacity .3s ease-in, transform .3s ease-in;
+      pointer-events: none;
+    }
+
+    .dynamic-text-stage.technical-section .highlight { color: #00e5ff; }
 
     .ui-container {
       transition: opacity .2s ease-out, transform .2s ease-out;
@@ -327,94 +340,83 @@
       box-shadow: 0 0 10px rgba(255, 215, 0, .75);
     }
 
-    .cta-wrapper { width: 100%; margin-top: .75rem; }
+    .hero-cta-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+      width: 100%;
+      margin-top: 1rem;
+      transition: opacity .24s ease-out, transform .24s ease-out;
+    }
+
+    .hero-cta-container.fade-out {
+      opacity: 0;
+      transform: translateY(-14px);
+      pointer-events: none;
+    }
 
     .hero-cta-liquid {
       position: relative;
-      isolation: isolate;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: .75rem;
+      gap: 10px;
       width: 100%;
-      height: 54px;
+      max-width: 320px;
+      height: 60px;
       margin: 0;
       padding: 0 18px;
-      overflow: hidden;
-      border: 1px solid rgba(255, 215, 0, .72);
-      border-radius: 12px;
-      background: linear-gradient(115deg, #ffd700 0%, #ff9900 52%, #ffd700 100%);
-      background-size: 200% 100%;
-      box-shadow: 0 0 25px rgba(255, 215, 0, .5);
-      color: #090a0f;
+      border: 0;
+      border-radius: 99px;
+      background: linear-gradient(135deg, #ff7a00 0%, #ff5000 100%);
+      box-shadow: 0 8px 25px rgba(255, 90, 0, .4), inset 0 2px 0 rgba(255, 255, 255, .2);
+      color: #fff;
       cursor: pointer;
-      font-family: var(--font-body);
+      font-family: var(--font-headline);
       font-size: 1.1rem;
       font-weight: 700;
       line-height: 1.25;
       text-align: center;
       direction: rtl;
-      animation: liquid-background 5s ease-in-out infinite, liquid-glow 2.8s ease-in-out infinite alternate;
+      transition: transform .2s ease, box-shadow .2s ease;
     }
 
-    .hero-cta-liquid::before {
-      position: absolute;
-      z-index: 0;
-      inset: 0;
-      content: "";
-      background: linear-gradient(115deg, transparent 18%, rgba(9,10,15,.38) 48%, transparent 76%);
-      background-size: 200% 100%;
-      animation: liquid-sheen 4s ease-in-out infinite;
-      pointer-events: none;
+    .hero-cta-liquid:active {
+      transform: scale(.96);
+      box-shadow: 0 4px 15px rgba(255, 90, 0, .3);
     }
 
-    .hero-cta-liquid .btn-text, .hero-cta-liquid .btn-icon { position: relative; z-index: 1; }
-    .hero-cta-liquid .btn-icon { display: inline-flex; flex: 0 0 auto; }
-    .hero-cta-liquid .btn-icon svg { width: 20px; height: 20px; }
-    .hero-cta-liquid:active { transform: scale(.98); }
+    .hero-cta-liquid:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+    .btn-arrow { font-size: 1.2rem; font-weight: 800; }
 
-    @keyframes liquid-background {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-    }
-
-    @keyframes liquid-sheen {
-      0%, 100% { background-position: 100% 50%; }
-      50% { background-position: 0% 50%; }
-    }
-
-    @keyframes liquid-glow {
-      0% { box-shadow: 0 0 16px rgba(255, 215, 0, .38); }
-      100% { box-shadow: 0 0 25px rgba(255, 215, 0, .5); }
-    }
-
-    .btn-sticky-glass {
+    .scroll-helper {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      width: 100%;
-      max-width: var(--content-max);
-      min-height: 48px;
-      margin: 0;
-      padding: 9px 18px;
-      border: 1px solid rgba(255, 215, 0, .3);
-      border-radius: 14px;
-      background: rgba(255, 255, 255, .1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 0 18px rgba(255, 215, 0, .11);
-      color: #fff;
-      cursor: pointer;
+      gap: .25rem;
+      color: #cbd5e1;
       font-family: var(--font-body);
-      font-size: 1rem;
-      font-weight: 700;
-      line-height: 1.25;
-      text-align: center;
-      transition: transform 160ms ease, background-color 160ms ease;
+      font-size: .85rem;
+      font-weight: 600;
+      letter-spacing: .5px;
+      opacity: .8;
     }
 
-    .btn-sticky-glass:hover { background: rgba(255, 255, 255, .16); }
-    .btn-sticky-glass:active { transform: scale(.985); }
+    .chevron-down {
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid #ffd700;
+      border-bottom: 2px solid #ffd700;
+      transform: rotate(45deg);
+      will-change: transform;
+      animation: bounce-anim 1.5s infinite;
+    }
+
+    @keyframes bounce-anim {
+      0%, 100% { transform: translateY(0) rotate(45deg); }
+      50% { transform: translateY(5px) rotate(45deg); }
+    }
 
     .btn-form-submit {
       display: flex;
@@ -432,7 +434,31 @@
       font-weight: 700;
     }
 
-    .hero-cta-liquid:focus-visible, .btn-sticky-glass:focus-visible, .btn-form-submit:focus-visible,
+    .sticky-floating-pill {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: calc(100% - 40px);
+      max-width: 380px;
+      height: 56px;
+      margin: 0;
+      padding: 8px 18px;
+      border: 1px solid rgba(255, 122, 0, .4);
+      border-radius: 99px;
+      background: rgba(255, 90, 0, .15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .2);
+      color: #fff;
+      cursor: pointer;
+      font-family: var(--font-headline);
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.25;
+      text-align: center;
+    }
+
+    .sticky-floating-pill:focus-visible, .btn-form-submit:focus-visible,
     .close-dialog:focus-visible, input:focus-visible, select:focus-visible {
       outline: 3px solid #fff;
       outline-offset: 3px;
@@ -441,10 +467,9 @@
     #sticky-cta {
       position: absolute;
       z-index: 40;
-      right: max(18px, calc((100vw - var(--content-max)) / 2));
-      bottom: calc(10px + var(--safe-bottom));
-      left: max(18px, calc((100vw - var(--content-max)) / 2));
-      width: auto;
+      right: 0;
+      bottom: calc(35px + var(--safe-bottom));
+      left: 0;
       margin-inline: auto;
       transition: all .5s cubic-bezier(.4, 0, .2, 1);
     }
@@ -460,6 +485,8 @@
       pointer-events: auto;
       transform: translateY(0);
     }
+
+    #sticky-cta:active.visible-in-scroll { transform: translateY(0) scale(.985); }
 
     #order-dialog {
       width: min(100% - 28px, 530px);
@@ -522,7 +549,10 @@
         <span class="trust-badge">حذاء أمان OBIDER</span>
         <h1 id="hero-title"><span class="highlight">درع لقدميك</span>. خفة في خطوتك.</h1>
         <p class="copy-body">حذاء الأمان OBIDER. حماية فولاذية وكيفلار بتصميم رياضي خفيف.</p>
-        <div class="cta-wrapper"><button class="hero-cta-liquid" type="button" onclick="scrollToOrderForm()"><span class="btn-text">اطلب الآن - الدفع عند الاستلام</span><span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></button></div>
+        <div class="hero-cta-container">
+          <button class="hero-cta-liquid" type="button" onclick="scrollToOrderForm()"><span class="btn-text">اطلب الآن - الدفع عند الاستلام</span><span class="btn-arrow" aria-hidden="true">←</span></button>
+          <div class="scroll-helper"><span>اسحب لاكتشاف الحذاء</span><span class="chevron-down"></span></div>
+        </div>
       </div>
     </section>
 
@@ -563,8 +593,8 @@
   <canvas id="particle-canvas" aria-hidden="true"></canvas>
   <div id="gradient-overlay" aria-hidden="true"></div>
   <div class="fixed-ui-layer" aria-label="واجهة الشراء">
-    <div id="dynamic-text-container" class="text-hidden" aria-live="polite" aria-atomic="true" aria-hidden="true"></div>
-    <button id="sticky-cta" class="btn-sticky-glass hidden-in-hero" type="button" aria-hidden="true" tabindex="-1" onclick="scrollToOrderForm()">اطلب الآن - الدفع عند الاستلام</button>
+    <div id="dynamic-text-container" class="text-stages" aria-live="polite" aria-atomic="true" aria-hidden="true"></div>
+    <button id="sticky-cta" class="sticky-floating-pill hidden-in-hero" type="button" aria-hidden="true" tabindex="-1" onclick="scrollToOrderForm()">اطلب الآن - الدفع عند الاستلام</button>
   </div>
 
   <dialog id="order-dialog" aria-labelledby="order-title">
@@ -605,6 +635,7 @@
     const sections = Array.from(story.querySelectorAll('.section'));
     const heroImage = document.querySelector('.hero img');
     const heroCopy = document.querySelector('.hero-copy');
+    const heroCtaContainer = document.querySelector('.hero-cta-container');
     const dynamicTextContainer = document.querySelector('#dynamic-text-container');
     const stickyCta = document.querySelector('#sticky-cta');
     const orderDialog = document.querySelector('#order-dialog');
@@ -620,6 +651,7 @@
     let lastCanvasSource = null;
     let lastCanvasWidth = 0;
     let lastCanvasHeight = 0;
+    let pendingTextStage = null;
     let lastOrderTrigger = null;
     let particleAnimationFrame = 0;
     let particleLastFrameTime = 0;
@@ -821,20 +853,46 @@
     function hideUiDuringTransition() {
       heroCopy.classList.remove('ui-visible');
       heroCopy.classList.add('ui-hidden');
-      dynamicTextContainer.className = 'text-hidden';
+      dynamicTextContainer.querySelectorAll('.dynamic-text-stage').forEach((stage) => {
+        if (stage.classList.contains('text-stage-visible')) {
+          stage.querySelector('#section-title')?.removeAttribute('id');
+          stage.querySelector('#section-desc')?.removeAttribute('id');
+          stage.classList.remove('text-stage-visible');
+          stage.classList.add('text-stage-hidden-top');
+        } else {
+          stage.remove();
+        }
+      });
+      pendingTextStage = null;
       dynamicTextContainer.setAttribute('aria-hidden', 'true');
     }
 
     function prepareSectionCopy(sectionIndex) {
-      dynamicTextContainer.replaceChildren();
+      pendingTextStage = null;
       const template = sections[sectionIndex]?.querySelector('.section-copy-template');
       if (!template) return;
+
+      const stage = document.createElement('div');
+      stage.className = 'dynamic-text-stage text-stage-hidden-bottom';
+      if (sections[sectionIndex].classList.contains('technical-section')) stage.classList.add('technical-section');
       const fragment = template.content.cloneNode(true);
       const heading = fragment.querySelector('h2');
       const description = fragment.querySelector('p');
       if (heading) heading.id = 'section-title';
       if (description) description.id = 'section-desc';
-      dynamicTextContainer.append(fragment);
+      stage.append(fragment);
+      dynamicTextContainer.append(stage);
+      pendingTextStage = stage;
+    }
+
+    function onSectionChange(targetSection) {
+      const isHero = targetSection === 0;
+      const showStickyCta = targetSection > 0 && targetSection < sections.length - 1;
+      stickyCta.classList.toggle('hidden-in-hero', !showStickyCta);
+      stickyCta.classList.toggle('visible-in-scroll', showStickyCta);
+      stickyCta.setAttribute('aria-hidden', String(!showStickyCta));
+      stickyCta.tabIndex = showStickyCta ? 0 : -1;
+      heroCtaContainer?.classList.toggle('fade-out', !isHero);
     }
 
     function revealSectionUi(sectionIndex) {
@@ -848,20 +906,20 @@
       }
 
       const hasFeatureCopy = sectionIndex > 0 && sectionIndex < sections.length - 1
-        && Boolean(dynamicTextContainer.querySelector('#section-title'));
+        && Boolean(pendingTextStage?.querySelector('#section-title'));
+      dynamicTextContainer.querySelectorAll('.dynamic-text-stage').forEach((stage) => {
+        if (stage !== pendingTextStage) stage.remove();
+      });
       if (hasFeatureCopy) {
-        const isTechnicalSlide = sections[sectionIndex].classList.contains('technical-section');
-        dynamicTextContainer.className = isTechnicalSlide ? 'text-visible technical-section' : 'text-visible';
+        pendingTextStage.classList.remove('text-stage-hidden-bottom', 'text-stage-hidden-top');
+        pendingTextStage.classList.add('text-stage-visible');
+        dynamicTextContainer.setAttribute('aria-hidden', 'false');
       } else {
-        dynamicTextContainer.className = 'text-hidden';
+        pendingTextStage = null;
+        dynamicTextContainer.setAttribute('aria-hidden', 'true');
       }
-      dynamicTextContainer.setAttribute('aria-hidden', String(!hasFeatureCopy));
 
-      const showStickyCta = sectionIndex > 0 && sectionIndex < sections.length - 1;
-      stickyCta.classList.toggle('hidden-in-hero', !showStickyCta);
-      stickyCta.classList.toggle('visible-in-scroll', showStickyCta);
-      stickyCta.setAttribute('aria-hidden', String(!showStickyCta));
-      stickyCta.tabIndex = showStickyCta ? 0 : -1;
+      onSectionChange(sectionIndex);
     }
 
     function triggerTextReveal(destination, transitionId) {
@@ -940,6 +998,8 @@
       const destination = Math.max(0, Math.min(sections.length - 1, origin + step));
       if (destination === origin) return;
       hideUiDuringTransition();
+      if (destination === 0) onSectionChange(destination);
+      else heroCtaContainer?.classList.add('fade-out');
       prepareSectionCopy(destination);
       gradientOverlay.classList.add('is-dimmed');
       stopHeroParticles();
