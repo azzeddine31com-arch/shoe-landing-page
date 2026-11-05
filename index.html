@@ -1153,18 +1153,18 @@
     .shoe-color-preview-section {
       position: relative;
       z-index: 25; /* above #frame-container (10) and #gradient-overlay (20) */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: min(100%, 560px, calc(100svh * .5625));
+      width: 100%;
       height: 100%;
       overflow: hidden;
     }
 
+    /* full-bleed: the collage covers the whole scene, no letterboxing */
     .shoes-image-stack {
-      position: relative;
+      position: absolute;
+      inset: 0;
       width: 100%;
-      aspect-ratio: 9 / 16;
+      height: 100%;
+      overflow: hidden;
     }
 
     .shoe-variant-img {
@@ -1200,7 +1200,21 @@
       background-color: #fff;
       box-shadow: 0 8px 20px rgba(0, 0, 0, .4);
       cursor: pointer;
-      transition: transform .2s ease, box-shadow .2s ease;
+      /* slide-up entrance: `translate` is animated separately so the active
+         card's `transform` (lift + scale) keeps working */
+      translate: 0 145%;
+      opacity: 0;
+      transition: translate .5s cubic-bezier(.22, 1, .36, 1), opacity .5s ease,
+                  transform .2s ease, box-shadow .2s ease;
+    }
+
+    .color-selectors-container .polaroid-selector:nth-child(1) { transition-delay: 0s, 0s, 0s, 0s; }
+    .color-selectors-container .polaroid-selector:nth-child(2) { transition-delay: .5s, .5s, 0s, 0s; }
+    .color-selectors-container .polaroid-selector:nth-child(3) { transition-delay: 1s, 1s, 0s, 0s; }
+
+    .color-selectors-container.is-visible .polaroid-selector {
+      translate: 0 0;
+      opacity: 1;
     }
 
     .tape-effect {
@@ -2322,6 +2336,19 @@
       buttons.forEach((button) => {
         button.addEventListener('click', () => select(button.getAttribute('data-target-color')));
       });
+
+      const row = section.querySelector('.color-selectors-container');
+      const reveal = () => row.classList.add('is-visible');
+      if (!('IntersectionObserver' in window)) {
+        reveal();
+        return;
+      }
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          row.classList.toggle('is-visible', entry.isIntersecting);
+        });
+      }, { threshold: .35 });
+      observer.observe(section);
     })();
 
     window.addEventListener('resize', resizeCanvas);
