@@ -440,7 +440,8 @@
     /* Chromium path: real refraction through backdrop-filter: url(#filter)
        (same pipeline as the React component's .glass-surface--svg) */
     .glass-surface--svg {
-      background: rgba(0, 0, 0, .1);
+      border-color: transparent !important;
+      background: rgba(0, 0, 0, var(--glass-frost, .1));
       -webkit-backdrop-filter: var(--glass-filter) saturate(var(--glass-saturation, 1));
       backdrop-filter: var(--glass-filter) saturate(var(--glass-saturation, 1));
       box-shadow:
@@ -453,6 +454,10 @@
         inset 0 8px 24px rgba(17, 17, 26, .05),
         inset 0 16px 56px rgba(17, 17, 26, .05);
     }
+
+    /* the component has no sheen/rim pseudo layers — the filter alone shapes the surface */
+    .glass-surface--svg::before,
+    .glass-surface--svg::after { content: none; }
 
     /* glass-surface__sheen */
     .glass-surface::before {
