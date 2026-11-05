@@ -103,9 +103,12 @@
       visibility: hidden;
       opacity: 1;
       pointer-events: none;
-      transition: opacity 200ms ease-out;
+      transition: opacity 200ms ease-out, transform .6s ease;
       background: #000;
     }
+
+    /* the closing video is nudged in a touch so its last frame matches the collage */
+    #frame-container.is-final-scene { transform: scale(1.055); }
 
     #frame-container.is-fading { opacity: 0; }
 
@@ -1163,10 +1166,15 @@
       height: 100%;
       overflow: hidden;
       opacity: 0;
-      transition: opacity .3s ease;
+      visibility: hidden; /* stops the big frames from being composited off-scene */
+      transition: opacity .35s ease, visibility 0s linear .35s;
     }
 
-    .shoe-color-preview-section.is-visible { opacity: 1; }
+    .shoe-color-preview-section.is-visible {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity .35s ease;
+    }
 
     /* the collage fills the whole scene, edge to edge */
     .shoes-image-stack {
@@ -1179,18 +1187,22 @@
 
     .shoe-variant-img {
       position: absolute;
-      z-index: 1;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
       opacity: 0;
+      visibility: hidden;
       pointer-events: none;
-      transition: opacity .4s cubic-bezier(.4, 0, .2, 1);
+      transition: opacity .45s ease, visibility 0s linear .45s;
     }
 
-    .shoe-variant-img.active { opacity: 1; }
+    .shoe-variant-img.active {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity .45s ease;
+    }
 
     .color-selectors-container {
       position: absolute;
@@ -1202,8 +1214,26 @@
       transform: translateX(-50%);
     }
 
+    /* wrapper carries the slide-up entrance so the button keeps its own transform */
+    .polaroid-slot {
+      display: block;
+      opacity: 0;
+      transform: translateY(160%);
+      transition: transform .55s cubic-bezier(.22, 1, .36, 1), opacity .45s ease;
+    }
+
+    .color-selectors-container.is-visible .polaroid-slot {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .color-selectors-container.is-visible .polaroid-slot:nth-child(1) { transition-delay: 0s, 0s; }
+    .color-selectors-container.is-visible .polaroid-slot:nth-child(2) { transition-delay: .5s, .5s; }
+    .color-selectors-container.is-visible .polaroid-slot:nth-child(3) { transition-delay: 1s, 1s; }
+
     .polaroid-selector {
       position: relative;
+      display: block;
       width: clamp(80px, 22vw, 108px);
       height: clamp(98px, 27vw, 132px);
       padding: 9px 9px 20px;
@@ -1211,23 +1241,18 @@
       background-color: #fff;
       box-shadow: 0 8px 20px rgba(0, 0, 0, .4);
       cursor: pointer;
-      /* slide-up entrance: `translate` is animated separately so the active
-         card's `transform` (lift + scale) keeps working */
-      translate: 0 145%;
-      opacity: 0;
-      filter: brightness(.62) saturate(.85);
-      transition: translate .5s cubic-bezier(.22, 1, .36, 1), opacity .5s ease,
-                  transform .25s ease, box-shadow .25s ease, filter .25s ease;
+      transition: transform .25s ease, box-shadow .25s ease;
     }
 
-    /* staggered entrance only — the cards disappear instantly when leaving */
-    .color-selectors-container.is-visible .polaroid-selector:nth-child(1) { transition-delay: 0s, 0s, 0s, 0s, 0s; }
-    .color-selectors-container.is-visible .polaroid-selector:nth-child(2) { transition-delay: .5s, .5s, 0s, 0s, 0s; }
-    .color-selectors-container.is-visible .polaroid-selector:nth-child(3) { transition-delay: 1s, 1s, 0s, 0s, 0s; }
-
-    .color-selectors-container.is-visible .polaroid-selector {
-      translate: 0 0;
+    /* dimmed overlay instead of a css filter (cheaper to composite) */
+    .polaroid-selector::after {
+      position: absolute;
+      inset: 0;
+      background: rgba(6, 7, 10, .58);
+      content: "";
       opacity: 1;
+      pointer-events: none;
+      transition: opacity .25s ease;
     }
 
     .tape-effect {
@@ -1254,10 +1279,11 @@
 
     .polaroid-selector.active {
       z-index: 2;
-      filter: none;
-      transform: translateY(-12px) scale(1.14);
+      transform: translateY(-12px) scale(1.12);
       box-shadow: 0 16px 32px rgba(0, 0, 0, .65), 0 0 0 3px #FF7A00;
     }
+
+    .polaroid-selector.active::after { opacity: 0; }
 
     .polaroid-selector:focus-visible {
       outline: 3px solid #fff;
@@ -1574,18 +1600,24 @@
           <img class="shoe-variant-img" data-color="black" src="Color%20section/assets/black.webp" alt="حذاء أمان أسود" decoding="async" loading="lazy">
 
           <div class="color-selectors-container" role="group" aria-label="اختر لون الحذاء">
-          <button class="polaroid-selector" type="button" data-target-color="blue" aria-label="اختر اللون الأزرق" aria-pressed="false">
-            <span class="tape-effect" aria-hidden="true"></span>
-            <span class="color-box blue-box"></span>
-          </button>
-          <button class="polaroid-selector active" type="button" data-target-color="grey" aria-label="اختر اللون الرمادي" aria-pressed="true">
-            <span class="tape-effect" aria-hidden="true"></span>
-            <span class="color-box grey-box"></span>
-          </button>
-          <button class="polaroid-selector" type="button" data-target-color="black" aria-label="اختر اللون الأسود" aria-pressed="false">
-            <span class="tape-effect" aria-hidden="true"></span>
-            <span class="color-box black-box"></span>
-          </button>
+            <span class="polaroid-slot">
+              <button class="polaroid-selector" type="button" data-target-color="blue" aria-label="اختر اللون الأزرق" aria-pressed="false">
+                <span class="tape-effect" aria-hidden="true"></span>
+                <span class="color-box blue-box"></span>
+              </button>
+            </span>
+            <span class="polaroid-slot">
+              <button class="polaroid-selector active" type="button" data-target-color="grey" aria-label="اختر اللون الرمادي" aria-pressed="true">
+                <span class="tape-effect" aria-hidden="true"></span>
+                <span class="color-box grey-box"></span>
+              </button>
+            </span>
+            <span class="polaroid-slot">
+              <button class="polaroid-selector" type="button" data-target-color="black" aria-label="اختر اللون الأسود" aria-pressed="false">
+                <span class="tape-effect" aria-hidden="true"></span>
+                <span class="color-box black-box"></span>
+              </button>
+            </span>
           </div>
         </div>
       </div>
@@ -2330,15 +2362,18 @@
 
     syncOrderPrice();
 
-    /* ---------- GlassSurface (React Bits) refraction port ----------
-       Builds the feImage displacement map + 3-channel feDisplacementMap chain
-       exactly like the component and wires it to backdrop-filter: url(...). */
+    /* ---------- final scene: colour switcher ----------
+       Three stacked frames cross-fade, polaroid thumbnails slide up one after
+       another, and the whole scene resets to grey before it fades out. */
     (function initColorSwitcher() {
       const section = document.querySelector('.shoe-color-preview-section');
       if (!section) return;
       const scene = section.closest('.color-section');
+      const row = section.querySelector('.color-selectors-container');
+      const frame = document.getElementById('frame-container');
       const buttons = Array.prototype.slice.call(section.querySelectorAll('.polaroid-selector'));
       const images = Array.prototype.slice.call(section.querySelectorAll('.shoe-variant-img'));
+
       const select = (color) => {
         buttons.forEach((button) => {
           const isActive = button.getAttribute('data-target-color') === color;
@@ -2353,30 +2388,54 @@
         button.addEventListener('click', () => select(button.getAttribute('data-target-color')));
       });
 
-      /* the scene (cover + collage + thumbnails) is only visible while its own
-         section sits in the viewport, so scrolling back exposes the video again
-         and hides the thumbnails right away */
-      const row = section.querySelector('.color-selectors-container');
-      const story = section.closest('#story') || window;
-      let queued = false;
-      const sync = () => {
-        queued = false;
-        const rect = section.getBoundingClientRect();
-        const viewport = window.innerHeight || 0;
-        const visible = rect.bottom > viewport * 0.25 && rect.top < viewport * 0.75;
-        row.classList.toggle('is-visible', visible);
-        section.classList.toggle('is-visible', visible);
-        scene?.classList.toggle('is-active', visible);
+      /* visibility is driven by IntersectionObserver only — no scroll listeners,
+         no layout reads per frame (that is what made scrolling heavy) */
+      let sceneOn = false;
+      let videoOn = false;
+      let fadeTimer = null;
+      const syncZoom = () => {
+        if (frame) frame.classList.toggle('is-final-scene', sceneOn || videoOn);
       };
-      const request = () => {
-        if (queued) return;
-        queued = true;
-        requestAnimationFrame(sync);
+
+      const show = () => {
+        if (fadeTimer) { window.clearTimeout(fadeTimer); fadeTimer = null; }
+        sceneOn = true;
+        section.classList.add('is-visible');
+        scene?.classList.add('is-active');
+        syncZoom();
+        row.classList.add('is-visible');
       };
-      story.addEventListener('scroll', request, { passive: true });
-      window.addEventListener('scroll', request, { passive: true });
-      window.addEventListener('resize', request);
-      sync();
+
+      const hide = () => {
+        sceneOn = false;
+        row.classList.remove('is-visible');   /* cards slide back down */
+        select('grey');                       /* colour animates back to grey */
+        if (fadeTimer) window.clearTimeout(fadeTimer);
+        fadeTimer = window.setTimeout(() => {
+          section.classList.remove('is-visible'); /* collage fades out … */
+          scene?.classList.remove('is-active');   /* … then the video shows */
+          syncZoom();
+        }, 260);
+      };
+
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => (entry.isIntersecting ? show() : hide()));
+        }, { threshold: .35 });
+        io.observe(section);
+
+        /* keep the closing video slightly zoomed while its own section is up */
+        const videoSections = document.querySelectorAll('#story .section.video-section');
+        const lastVideo = videoSections[videoSections.length - 2];
+        if (lastVideo) {
+          const ioVideo = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => { videoOn = entry.isIntersecting; syncZoom(); });
+          }, { threshold: .5 });
+          ioVideo.observe(lastVideo);
+        }
+      } else {
+        show();
+      }
     })();
 
     window.addEventListener('resize', resizeCanvas);
