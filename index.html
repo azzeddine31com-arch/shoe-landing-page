@@ -1133,6 +1133,108 @@
 
     #order-status:empty { display: none; }
 
+    /* ---------- Color switcher (final scene) ---------- */
+    .color-section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #06070a;
+    }
+
+    /* opaque backdrop that covers the video canvas behind the final scene */
+    .color-section::before {
+      position: absolute;
+      z-index: 15;
+      inset: 0;
+      background: #06070a;
+      content: "";
+    }
+
+    .shoe-color-preview-section {
+      position: relative;
+      z-index: 25; /* above #frame-container (10) and #gradient-overlay (20) */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: min(100%, 560px, calc(100svh * .5625));
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .shoes-image-stack {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9 / 16;
+    }
+
+    .shoe-variant-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .4s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .shoe-variant-img.active { opacity: 1; }
+
+    .color-selectors-container {
+      position: absolute;
+      bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+      left: 50%;
+      z-index: 10;
+      display: flex;
+      gap: clamp(10px, 3.2vw, 18px);
+      transform: translateX(-50%);
+    }
+
+    .polaroid-selector {
+      position: relative;
+      width: clamp(62px, 17vw, 78px);
+      height: clamp(76px, 21vw, 94px);
+      padding: 8px 8px 16px;
+      border: none;
+      background-color: #fff;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, .4);
+      cursor: pointer;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .tape-effect {
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      width: 30px;
+      height: 12px;
+      border-radius: 2px;
+      background-color: rgba(40, 40, 40, .7);
+      transform: translateX(-50%);
+    }
+
+    .color-box {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 2px;
+    }
+
+    .black-box { background-color: #1A1A1A; }
+    .grey-box { background-color: #7D828A; }
+    .blue-box { background-color: #1E3A68; }
+
+    .polaroid-selector.active {
+      transform: translateY(-6px) scale(1.05);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, .6), 0 0 0 2px #FF7A00;
+    }
+
+    .polaroid-selector:focus-visible {
+      outline: 3px solid #fff;
+      outline-offset: 3px;
+    }
+
     /* ---------- FAQ modal ---------- */
     #faq-dialog {
       width: min(100% - 24px, 520px);
@@ -1174,16 +1276,43 @@
       container-type: inline-size;
       position: relative;
       overflow: hidden;
-      padding: 8cqw 6.5cqw 6.5cqw;
-      border: 1px solid rgba(255, 255, 255, .09);
-      border-radius: 24px;
+      padding: 9cqw 6.2cqw 7cqw;
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 26px;
       background:
-        radial-gradient(120% 78% at 50% -12%, rgba(255, 177, 77, .2), rgba(255, 177, 77, 0) 62%),
-        linear-gradient(165deg, rgba(23, 25, 31, .97), rgba(9, 10, 13, .98));
-      box-shadow: 0 26px 70px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 255, 255, .07);
+        radial-gradient(92% 62% at 50% -14%, rgba(255, 177, 77, .3), rgba(255, 177, 77, 0) 66%),
+        radial-gradient(70% 46% at 104% 108%, rgba(255, 122, 0, .12), rgba(255, 122, 0, 0) 72%),
+        linear-gradient(168deg, #1b1d24 0%, #0d0e12 58%, #08090c 100%);
+      box-shadow:
+        0 30px 80px rgba(0, 0, 0, .72),
+        0 0 0 1px rgba(255, 177, 77, .1),
+        inset 0 1px 0 rgba(255, 255, 255, .1);
       -webkit-backdrop-filter: blur(18px) saturate(1.15);
       backdrop-filter: blur(18px) saturate(1.15);
     }
+
+    /* golden hairline across the top + soft vignette at the bottom */
+    .faq-panel::before {
+      position: absolute;
+      z-index: 2;
+      inset: 0 0 auto;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 196, 107, .8), transparent);
+      content: "";
+      pointer-events: none;
+    }
+
+    .faq-panel::after {
+      position: absolute;
+      z-index: 0;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(120% 82% at 50% 0%, transparent 46%, rgba(0, 0, 0, .38) 100%);
+      content: "";
+      pointer-events: none;
+    }
+
+    .faq-head, .faq-list { position: relative; z-index: 1; }
 
     .faq-close {
       position: absolute;
@@ -1203,14 +1332,23 @@
       cursor: pointer;
       font-size: 18px;
       line-height: 1;
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      transition: background .2s ease, border-color .2s ease, transform .2s ease;
+    }
+
+    .faq-close:hover {
+      border-color: rgba(255, 177, 77, .45);
+      background: rgba(255, 177, 77, .16);
+      transform: scale(1.06);
     }
 
     .faq-head {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 2.4cqw;
-      margin-bottom: 6cqw;
+      gap: 2.6cqw;
+      margin-bottom: 6.4cqw;
       text-align: center;
     }
 
@@ -1222,7 +1360,11 @@
       height: clamp(44px, 15cqw, 62px);
       border-radius: 50%;
       background: linear-gradient(160deg, #ffd08a 0%, #ff9a2e 55%, #ff7a00 100%);
-      box-shadow: 0 12px 28px rgba(255, 138, 31, .38), inset 0 2px 0 rgba(255, 255, 255, .5);
+      box-shadow:
+        0 14px 32px rgba(255, 138, 31, .42),
+        0 0 0 7px rgba(255, 177, 77, .08),
+        0 0 0 1px rgba(255, 214, 160, .35),
+        inset 0 2px 0 rgba(255, 255, 255, .55);
       color: #2a1400;
       font-family: 'Titan One', var(--font-headline), sans-serif;
       font-size: clamp(22px, 7.4cqw, 30px);
@@ -1232,7 +1374,11 @@
 
     .faq-title {
       margin: 0;
+      background: linear-gradient(180deg, #ffe0b0 0%, #ffc46b 52%, #ff9a2e 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
       color: #ffc46b;
+      -webkit-text-fill-color: transparent;
       font-family: var(--font-headline);
       font-size: clamp(19px, 6cqw, 34px);
       font-weight: 700;
@@ -1242,7 +1388,7 @@
 
     .faq-sub {
       margin: 0;
-      color: #98a1ac;
+      color: #9aa3ae;
       font-size: clamp(11px, 3cqw, 16px);
       line-height: 1.6;
     }
@@ -1252,22 +1398,42 @@
       flex-direction: column;
       gap: 3.2cqw;
       margin: 0;
-      padding: 0;
+      padding: 0 0 1.5cqw;
       list-style: none;
     }
 
     .faq-item {
-      padding: 3.6cqw 4cqw;
-      border: 1px solid rgba(255, 255, 255, .07);
-      border-radius: 14px;
-      background: rgba(255, 255, 255, .035);
-      transition: border-color .2s ease, background .2s ease;
+      position: relative;
+      overflow: hidden;
+      padding: 3.9cqw 4.4cqw 3.6cqw;
+      border: 1px solid rgba(255, 255, 255, .075);
+      border-radius: 16px;
+      background: linear-gradient(158deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .022));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
+      transition: border-color .24s ease, background .24s ease, transform .24s ease, box-shadow .24s ease;
+    }
+
+    /* accent bar on the leading edge of every card */
+    .faq-item::before {
+      position: absolute;
+      inset-block: 16%;
+      inset-inline-start: 0;
+      width: 3px;
+      border-radius: 3px;
+      background: linear-gradient(180deg, #ffd08a, #ff7a00);
+      opacity: .55;
+      content: "";
+      transition: opacity .24s ease;
     }
 
     .faq-item:hover {
-      border-color: rgba(255, 177, 77, .34);
-      background: rgba(255, 177, 77, .06);
+      border-color: rgba(255, 177, 77, .36);
+      background: linear-gradient(158deg, rgba(255, 177, 77, .1), rgba(255, 177, 77, .03));
+      transform: translateY(-1px);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 10px 24px rgba(0, 0, 0, .3);
     }
+
+    .faq-item:hover::before { opacity: 1; }
 
     .faq-q {
       display: flex;
@@ -1282,18 +1448,30 @@
     }
 
     .faq-q::before {
+      display: flex;
       flex: 0 0 auto;
-      color: #ffb14d;
+      align-items: center;
+      justify-content: center;
+      width: 1.7em;
+      height: 1.7em;
+      margin-top: .06em;
+      border: 1px solid rgba(255, 177, 77, .3);
+      border-radius: 10px;
+      background: radial-gradient(circle at 50% 0%, rgba(255, 196, 107, .28), rgba(255, 177, 77, .08));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12);
+      color: #ffc46b;
       content: "?";
       font-family: 'Titan One', var(--font-headline), sans-serif;
-      font-size: 1.05em;
+      font-size: .96em;
       font-weight: 400;
-      line-height: 1.3;
+      line-height: 1;
+      padding-bottom: .12em;
     }
 
     .faq-a {
       margin: 0;
-      color: #b7bec8;
+      padding-inline-start: 2.7em;
+      color: #b9c0ca;
       font-size: clamp(12px, 3.1cqw, 16px);
       font-weight: 400;
       line-height: 1.85;
@@ -1359,7 +1537,30 @@
     <section class="section video-section technical-section" aria-label="العرض النهائي" data-video="10" data-duration="2.53" data-forward="transition-10-forward.mp4" data-reverse="transition-10-reverse.mp4" data-anchor="section-10-anchor.webp">
       <template class="section-copy-template"><span class="feature-tag">العرض النهائي</span><h2>كل ما تحتاجه في <span class="highlight">حذاء واحد</span>.</h2><p class="copy-body">الحماية، الراحة، الخفة، والسرعة. احمِ نفسك في موقع العمل الآن.</p></template>
     </section>
-    <section class="section video-section silent-section" aria-label="المشهد الختامي" data-index="11" data-title="" data-body="" data-cta="false" data-video="11" data-duration="3.22" data-forward="transition-11-forward.mp4" data-reverse="transition-11-reverse.mp4" data-anchor="section-11-anchor.webp"></section>
+    <section class="section video-section silent-section color-section" aria-label="اختر لون حذائك" data-index="11" data-title="" data-body="" data-cta="false" data-video="11" data-duration="3.22" data-forward="transition-11-forward.mp4" data-reverse="transition-11-reverse.mp4" data-anchor="section-11-anchor.webp">
+      <div class="shoe-color-preview-section">
+        <div class="shoes-image-stack">
+          <img class="shoe-variant-img" data-color="blue" src="Color%20section/assets/blue.webp" alt="حذاء أمان أزرق" decoding="async" loading="lazy">
+          <img class="shoe-variant-img active" data-color="grey" src="Color%20section/assets/grey.webp" alt="حذاء أمان رمادي" decoding="async" loading="lazy">
+          <img class="shoe-variant-img" data-color="black" src="Color%20section/assets/black.webp" alt="حذاء أمان أسود" decoding="async" loading="lazy">
+
+          <div class="color-selectors-container" role="group" aria-label="اختر لون الحذاء">
+          <button class="polaroid-selector" type="button" data-target-color="blue" aria-label="اختر اللون الأزرق" aria-pressed="false">
+            <span class="tape-effect" aria-hidden="true"></span>
+            <span class="color-box blue-box"></span>
+          </button>
+          <button class="polaroid-selector active" type="button" data-target-color="grey" aria-label="اختر اللون الرمادي" aria-pressed="true">
+            <span class="tape-effect" aria-hidden="true"></span>
+            <span class="color-box grey-box"></span>
+          </button>
+          <button class="polaroid-selector" type="button" data-target-color="black" aria-label="اختر اللون الأسود" aria-pressed="false">
+            <span class="tape-effect" aria-hidden="true"></span>
+            <span class="color-box black-box"></span>
+          </button>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <div id="frame-container" aria-hidden="true"><canvas id="frame-canvas"></canvas></div>
@@ -2103,6 +2304,26 @@
     /* ---------- GlassSurface (React Bits) refraction port ----------
        Builds the feImage displacement map + 3-channel feDisplacementMap chain
        exactly like the component and wires it to backdrop-filter: url(...). */
+    (function initColorSwitcher() {
+      const section = document.querySelector('.shoe-color-preview-section');
+      if (!section) return;
+      const buttons = Array.prototype.slice.call(section.querySelectorAll('.polaroid-selector'));
+      const images = Array.prototype.slice.call(section.querySelectorAll('.shoe-variant-img'));
+      const select = (color) => {
+        buttons.forEach((button) => {
+          const isActive = button.getAttribute('data-target-color') === color;
+          button.classList.toggle('active', isActive);
+          button.setAttribute('aria-pressed', String(isActive));
+        });
+        images.forEach((image) => {
+          image.classList.toggle('active', image.getAttribute('data-color') === color);
+        });
+      };
+      buttons.forEach((button) => {
+        button.addEventListener('click', () => select(button.getAttribute('data-target-color')));
+      });
+    })();
+
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
   </script>
