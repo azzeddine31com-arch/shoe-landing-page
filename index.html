@@ -437,6 +437,23 @@
         0 16px 56px rgba(17, 17, 26, .12);
     }
 
+    /* Chromium path: real refraction through backdrop-filter: url(#filter)
+       (same pipeline as the React component's .glass-surface--svg) */
+    .glass-surface--svg {
+      background: rgba(0, 0, 0, .1);
+      -webkit-backdrop-filter: var(--glass-filter) saturate(var(--glass-saturation, 1));
+      backdrop-filter: var(--glass-filter) saturate(var(--glass-saturation, 1));
+      box-shadow:
+        inset 0 0 2px 1px rgba(255, 255, 255, .35),
+        inset 0 0 10px 4px rgba(255, 255, 255, .15),
+        0 4px 16px rgba(17, 17, 26, .05),
+        0 8px 24px rgba(17, 17, 26, .05),
+        0 16px 56px rgba(17, 17, 26, .05),
+        inset 0 4px 16px rgba(17, 17, 26, .05),
+        inset 0 8px 24px rgba(17, 17, 26, .05),
+        inset 0 16px 56px rgba(17, 17, 26, .05);
+    }
+
     /* glass-surface__sheen */
     .glass-surface::before {
       position: absolute;
@@ -504,11 +521,8 @@
       width: 52px;
       height: 52px;
       padding: 0 0 3px;
-      border: 1px solid rgba(255, 199, 122, .4);
+      border: 1px solid rgba(255, 255, 255, .16);
       border-radius: 50%;
-      background:
-        radial-gradient(120% 120% at 30% 0%, rgba(255, 208, 138, .34), rgba(255, 138, 31, .12) 62%),
-        rgba(255, 177, 77, .12);
       color: #ffc46b;
       cursor: pointer;
       font-family: 'Titan One', var(--font-headline), sans-serif;
@@ -2078,6 +2092,126 @@
     });
 
     syncOrderPrice();
+
+    /* ---------- GlassSurface (React Bits) refraction port ----------
+       Builds the feImage displacement map + 3-channel feDisplacementMap chain
+       exactly like the component and wires it to backdrop-filter: url(...). */
+    (function initGlassSurfaces() {
+      const NS = 'http://www.w3.org/2000/svg';
+      const probe = document.createElement('div');
+      probe.style.backdropFilter = 'url(#glass-probe)';
+      const supportsSvgBackdrop = probe.style.backdropFilter !== '' &&
+        !(/Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)) &&
+        !/Firefox/.test(navigator.userAgent);
+      if (!supportsSvgBackdrop) return;
+
+      const host = document.createElementNS(NS, 'svg');
+      host.setAttribute('aria-hidden', 'true');
+      host.setAttribute('focusable', 'false');
+      host.setAttribute('width', '0');
+      host.setAttribute('height', '0');
+      host.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;pointer-events:none';
+      const defs = document.createElementNS(NS, 'defs');
+      host.appendChild(defs);
+      document.body.appendChild(host);
+
+      const node = (name, attrs) => {
+        const element = document.createElementNS(NS, name);
+        Object.keys(attrs).forEach((key) => element.setAttribute(key, attrs[key]));
+        return element;
+      };
+
+      const buildFilter = (id, settings) => {
+        const filter = node('filter', {
+          id,
+          'color-interpolation-filters': 'sRGB',
+          x: '0%', y: '0%', width: '100%', height: '100%'
+        });
+        const feImage = node('feImage', {
+          x: '0', y: '0', width: '100%', height: '100%',
+          preserveAspectRatio: 'none', result: 'map'
+        });
+        const channels = [
+          ['red', '1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0'],
+          ['green', '0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0'],
+          ['blue', '0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0']
+        ];
+        filter.appendChild(feImage);
+        channels.forEach(([key, matrix]) => {
+          filter.appendChild(node('feDisplacementMap', {
+            in: 'SourceGraphic', in2: 'map', id: `${key}channel`, result: `disp-${key}`,
+            scale: String(settings.distortionScale + settings.offsets[key]),
+            xChannelSelector: 'R', yChannelSelector: 'G'
+          }));
+          filter.appendChild(node('feColorMatrix', { in: `disp-${key}`, type: 'matrix', values: matrix, result: key }));
+        });
+        filter.appendChild(node('feBlend', { in: 'red', in2: 'green', mode: 'screen', result: 'rg' }));
+        filter.appendChild(node('feBlend', { in: 'rg', in2: 'blue', mode: 'screen', result: 'output' }));
+        filter.appendChild(node('feGaussianBlur', { in: 'output', stdDeviation: String(settings.displace) }));
+        defs.appendChild(filter);
+        return feImage;
+      };
+
+      const displacementMap = (width, height, radius, settings) => {
+        const edge = Math.min(width, height) * settings.borderWidth * 0.5;
+        const inner = {
+          x: edge,
+          y: edge,
+          width: Math.max(1, width - edge * 2),
+          height: Math.max(1, height - edge * 2)
+        };
+        const svg = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">`
+          + '<defs>'
+          + '<linearGradient id="r" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#0000"/><stop offset="100%" stop-color="red"/></linearGradient>'
+          + '<linearGradient id="b" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#0000"/><stop offset="100%" stop-color="blue"/></linearGradient>'
+          + `<filter id="s" filterUnits="userSpaceOnUse" x="0" y="0" width="${width}" height="${height}" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="${settings.blur}" /></filter>`
+          + '</defs>'
+          + `<rect x="0" y="0" width="${width}" height="${height}" fill="black"></rect>`
+          + `<rect x="0" y="0" width="${width}" height="${height}" rx="${radius}" fill="url(#r)" />`
+          + `<rect x="0" y="0" width="${width}" height="${height}" rx="${radius}" fill="url(#b)" style="mix-blend-mode:${settings.mixBlendMode}" />`
+          + `<rect x="${inner.x}" y="${inner.y}" width="${inner.width}" height="${inner.height}" rx="${radius}" fill="hsl(0 0% ${settings.brightness}% / ${settings.opacity})" filter="url(#s)" />`
+          + '</svg>';
+        return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+      };
+
+      const mount = (selector, options) => {
+        const target = document.querySelector(selector);
+        if (!target) return;
+        const settings = Object.assign({
+          name: 'glass',
+          radius: 24,
+          borderWidth: 0.07,
+          brightness: 50,
+          opacity: 0.93,
+          blur: 11,
+          displace: 0.5,
+          distortionScale: -180,
+          offsets: { red: 0, green: 10, blue: 20 },
+          mixBlendMode: 'difference'
+        }, options);
+        const filterId = `glass-filter-${settings.name}`;
+        const feImage = buildFilter(filterId, settings);
+        target.style.setProperty('--glass-filter', `url(#${filterId})`);
+        target.style.setProperty('--glass-saturation', '1');
+
+        const draw = () => {
+          const width = Math.max(2, Math.round(target.offsetWidth));
+          const height = Math.max(2, Math.round(target.offsetHeight));
+          const radius = Math.min(settings.radius, height / 2);
+          if (target.dataset.glassMap === `${width}x${height}`) return;
+          target.dataset.glassMap = `${width}x${height}`;
+          feImage.setAttribute('href', displacementMap(width, height, radius, settings));
+        };
+
+        draw();
+        target.classList.add('glass-surface--svg');
+        if (typeof ResizeObserver === 'function') new ResizeObserver(draw).observe(target);
+        window.addEventListener('resize', draw);
+      };
+
+      mount('#sticky-cta', { name: 'cta', radius: 999 });
+      mount('#faq-fab', { name: 'fab', radius: 26 });
+    })();
 
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
