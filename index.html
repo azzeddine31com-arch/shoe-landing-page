@@ -418,81 +418,179 @@
       50% { transform: translateY(5px) rotate(45deg); }
     }
 
-    /* GlassSurface (React Bits) recreated in CSS:
-       tint + backdrop blur/saturation + sheen layer + rim layer + soft stacked shadows */
+    /* ---------- React Bits · GlassSurface.css (verbatim) ---------- */
     .glass-surface {
       position: relative;
-      isolation: isolate;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       overflow: hidden;
-      background: rgba(255, 255, 255, .1);
-      -webkit-backdrop-filter: blur(12px) saturate(1.4) brightness(1.04);
-      backdrop-filter: blur(12px) saturate(1.4) brightness(1.04);
-      box-shadow:
-        inset 0 1px 0 0 rgba(255, 255, 255, .3),
-        inset 0 -1px 0 0 rgba(255, 255, 255, .08),
-        inset 0 0 2px 1px rgba(255, 255, 255, .26),
-        inset 0 0 12px 3px rgba(255, 255, 255, .1),
-        0 4px 16px rgba(17, 17, 26, .1),
-        0 8px 24px rgba(17, 17, 26, .1),
-        0 16px 56px rgba(17, 17, 26, .12);
+      transition: opacity 0.26s ease-out;
     }
 
-    /* Chromium path: real refraction through backdrop-filter: url(#filter)
-       (same pipeline as the React component's .glass-surface--svg) */
-    .glass-surface--svg {
-      border-color: transparent !important;
-      background: rgba(0, 0, 0, var(--glass-frost, .1));
-      -webkit-backdrop-filter: var(--glass-filter) saturate(var(--glass-saturation, 1));
-      backdrop-filter: var(--glass-filter) saturate(var(--glass-saturation, 1));
-      box-shadow:
-        inset 0 0 2px 1px rgba(255, 255, 255, .35),
-        inset 0 0 10px 4px rgba(255, 255, 255, .15),
-        0 4px 16px rgba(17, 17, 26, .05),
-        0 8px 24px rgba(17, 17, 26, .05),
-        0 16px 56px rgba(17, 17, 26, .05),
-        inset 0 4px 16px rgba(17, 17, 26, .05),
-        inset 0 8px 24px rgba(17, 17, 26, .05),
-        inset 0 16px 56px rgba(17, 17, 26, .05);
-    }
-
-    /* the component has no sheen/rim pseudo layers — the filter alone shapes the surface */
-    .glass-surface--svg::before,
-    .glass-surface--svg::after { content: none; }
-
-    /* glass-surface__sheen */
-    .glass-surface::before {
+    .glass-surface__filter {
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
       position: absolute;
+      inset: 0;
+      opacity: 0;
       z-index: -1;
+    }
+
+    .glass-surface__content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+      border-radius: inherit;
+      position: relative;
+      z-index: 1;
+    }
+
+    .glass-surface--svg {
+      background: light-dark(hsl(0 0% 100% / var(--glass-frost, 0)), hsl(0 0% 0% / var(--glass-frost, 0)));
+      backdrop-filter: var(--filter-id, url(#glass-filter)) saturate(var(--glass-saturation, 1));
+      box-shadow:
+        0 0 2px 1px light-dark(color-mix(in oklch, black, transparent 85%), color-mix(in oklch, white, transparent 65%))
+          inset,
+        0 0 10px 4px light-dark(color-mix(in oklch, black, transparent 90%), color-mix(in oklch, white, transparent 85%))
+          inset,
+        0px 4px 16px rgba(17, 17, 26, 0.05),
+        0px 8px 24px rgba(17, 17, 26, 0.05),
+        0px 16px 56px rgba(17, 17, 26, 0.05),
+        0px 4px 16px rgba(17, 17, 26, 0.05) inset,
+        0px 8px 24px rgba(17, 17, 26, 0.05) inset,
+        0px 16px 56px rgba(17, 17, 26, 0.05) inset;
+    }
+
+    .glass-surface--webgl {
+      box-shadow:
+        0px 4px 16px rgba(17, 17, 26, 0.05),
+        0px 8px 24px rgba(17, 17, 26, 0.05),
+        0px 16px 56px rgba(17, 17, 26, 0.05);
+    }
+
+    .glass-surface__canvas,
+    .glass-surface__frame {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    .glass-surface__frame {
+      background: light-dark(hsl(0 0% 100% / var(--glass-frost, 0)), hsl(0 0% 0% / var(--glass-frost, 0)));
+      box-shadow:
+        0 0 2px 1px light-dark(color-mix(in oklch, black, transparent 85%), color-mix(in oklch, white, transparent 65%))
+          inset,
+        0 0 10px 4px light-dark(color-mix(in oklch, black, transparent 90%), color-mix(in oklch, white, transparent 85%))
+          inset,
+        0px 4px 16px rgba(17, 17, 26, 0.05) inset,
+        0px 8px 24px rgba(17, 17, 26, 0.05) inset,
+        0px 16px 56px rgba(17, 17, 26, 0.05) inset;
+    }
+
+    .glass-surface--fallback {
+      background: light-dark(
+        hsl(0 0% 100% / calc(0.12 + var(--glass-frost, 0) * 0.5)),
+        hsl(0 0% 100% / calc(0.04 + var(--glass-frost, 0) * 0.3))
+      );
+      -webkit-backdrop-filter: blur(12px) saturate(calc(var(--glass-saturation, 1) * 1.4)) brightness(1.04);
+      backdrop-filter: blur(12px) saturate(calc(var(--glass-saturation, 1) * 1.4)) brightness(1.04);
+      box-shadow:
+        inset 0 1px 0 0 light-dark(hsl(0 0% 100% / 0.85), hsl(0 0% 100% / 0.3)),
+        inset 0 -1px 0 0 light-dark(hsl(0 0% 100% / 0.35), hsl(0 0% 100% / 0.08)),
+        0 0 2px 1px light-dark(color-mix(in oklch, black, transparent 88%), color-mix(in oklch, white, transparent 72%))
+          inset,
+        0 0 12px 3px light-dark(color-mix(in oklch, white, transparent 72%), color-mix(in oklch, white, transparent 90%))
+          inset,
+        0px 4px 16px rgba(17, 17, 26, 0.06),
+        0px 8px 24px rgba(17, 17, 26, 0.06),
+        0px 16px 56px rgba(17, 17, 26, 0.06);
+    }
+
+    .glass-surface__sheen,
+    .glass-surface__rim {
+      position: absolute;
       inset: 0;
       border-radius: inherit;
-      background: linear-gradient(135deg,
-        rgba(255, 255, 255, .16) 0%,
+      pointer-events: none;
+    }
+
+    .glass-surface__sheen {
+      background: linear-gradient(
+        135deg,
+        light-dark(hsl(0 0% 100% / 0.42), hsl(0 0% 100% / 0.14)) 0%,
         transparent 42%,
         transparent 64%,
-        rgba(255, 255, 255, .06) 100%);
-      content: "";
-      pointer-events: none;
+        light-dark(hsl(0 0% 100% / 0.18), hsl(0 0% 100% / 0.05)) 100%
+      );
     }
 
-    /* glass-surface__rim */
-    .glass-surface::after {
-      position: absolute;
-      z-index: -1;
-      inset: 0;
+    .glass-surface__rim {
       padding: 3px;
-      border-radius: inherit;
-      background: linear-gradient(150deg,
-        rgba(255, 255, 255, .34),
-        rgba(255, 255, 255, .03) 45%,
-        rgba(255, 255, 255, .02) 60%,
-        rgba(255, 255, 255, .18));
-      content: "";
-      pointer-events: none;
-      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      background: linear-gradient(
+        150deg,
+        light-dark(hsl(0 0% 100% / 0.7), hsl(0 0% 100% / 0.34)),
+        light-dark(hsl(0 0% 100% / 0.1), hsl(0 0% 100% / 0.03)) 45%,
+        light-dark(hsl(0 0% 100% / 0.08), hsl(0 0% 100% / 0.02)) 60%,
+        light-dark(hsl(0 0% 100% / 0.42), hsl(0 0% 100% / 0.18))
+      );
+      -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
       -webkit-mask-composite: xor;
-      mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+      mask:
+        linear-gradient(#000 0 0) content-box exclude,
+        linear-gradient(#000 0 0);
     }
 
+    .glass-surface__line,
+    .glass-surface__glow {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      -webkit-mask-size: 100% 100%;
+      mask-size: 100% 100%;
+    }
+
+    .glass-surface--svg .glass-surface__line,
+    .glass-surface--webgl .glass-surface__line {
+      background: light-dark(color-mix(in oklch, black, transparent 85%), color-mix(in oklch, white, transparent 65%));
+    }
+
+    .glass-surface--svg .glass-surface__glow,
+    .glass-surface--webgl .glass-surface__glow {
+      background: light-dark(color-mix(in oklch, black, transparent 90%), color-mix(in oklch, white, transparent 85%));
+    }
+
+    .glass-surface--fallback .glass-surface__line {
+      background: light-dark(color-mix(in oklch, black, transparent 88%), color-mix(in oklch, white, transparent 72%));
+    }
+
+    .glass-surface--fallback .glass-surface__glow {
+      background: light-dark(color-mix(in oklch, white, transparent 72%), color-mix(in oklch, white, transparent 90%));
+    }
+
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      .glass-surface--fallback {
+        background: light-dark(hsl(0 0% 100% / 0.72), hsl(0 0% 12% / 0.72));
+      }
+    }
+
+    .glass-surface:focus-visible {
+      outline: 2px solid light-dark(#007aff, #0a84ff);
+      outline-offset: 2px;
+    }
+
+    /* host layout only: the buttons already carry their own padding */
+    #sticky-cta .glass-surface__content,
+    #faq-fab .glass-surface__content { padding: 0; }
     .sticky-floating-pill {
       position: relative;
       display: flex;
@@ -503,7 +601,7 @@
       height: 56px;
       margin: 0;
       padding: 8px 18px;
-      border: 1px solid rgba(255, 255, 255, .16);
+      border: 0;
       border-radius: 999px;
       color: #fff;
       cursor: pointer;
@@ -526,7 +624,7 @@
       width: 52px;
       height: 52px;
       padding: 0 0 3px;
-      border: 1px solid rgba(255, 255, 255, .16);
+      border: 0;
       border-radius: 50%;
       color: #ffc46b;
       cursor: pointer;
@@ -2103,113 +2201,142 @@
        exactly like the component and wires it to backdrop-filter: url(...). */
     (function initGlassSurfaces() {
       const NS = 'http://www.w3.org/2000/svg';
-      const probe = document.createElement('div');
-      probe.style.backdropFilter = 'url(#glass-probe)';
-      const supportsSvgBackdrop = probe.style.backdropFilter !== '' &&
-        !(/Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)) &&
-        !/Firefox/.test(navigator.userAgent);
-      if (!supportsSvgBackdrop) return;
 
-      const host = document.createElementNS(NS, 'svg');
-      host.setAttribute('aria-hidden', 'true');
-      host.setAttribute('focusable', 'false');
-      host.setAttribute('width', '0');
-      host.setAttribute('height', '0');
-      host.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;pointer-events:none';
-      const defs = document.createElementNS(NS, 'defs');
-      host.appendChild(defs);
-      document.body.appendChild(host);
+      /* same probe the component uses: Chromium-only support for url(#filter) backdrops */
+      const supportsSVGFilters = () => {
+        if (/Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)) return false;
+        if (/Firefox/.test(navigator.userAgent)) return false;
+        const probe = document.createElement('div');
+        probe.style.backdropFilter = 'url(#glass-probe)';
+        return probe.style.backdropFilter !== '';
+      };
+      const svgSupported = supportsSVGFilters();
 
-      const node = (name, attrs) => {
+      const svgNode = (name, attrs) => {
         const element = document.createElementNS(NS, name);
         Object.keys(attrs).forEach((key) => element.setAttribute(key, attrs[key]));
         return element;
       };
 
-      const buildFilter = (id, settings) => {
-        const filter = node('filter', {
+      /* displacement map — identical markup to the component's generateDisplacementMap() */
+      const displacementMap = (width, height, radius, s) => {
+        const edge = Math.min(width, height) * (s.borderWidth * 0.5);
+        const svg = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="red-grad" x1="100%" y1="0%" x2="0%" y2="0%">
+              <stop offset="0%" stop-color="#0000"/><stop offset="100%" stop-color="red"/>
+            </linearGradient>
+            <linearGradient id="blue-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#0000"/><stop offset="100%" stop-color="blue"/>
+            </linearGradient>
+            <filter id="soft" filterUnits="userSpaceOnUse" x="0" y="0" width="${width}" height="${height}" color-interpolation-filters="sRGB">
+              <feGaussianBlur stdDeviation="${s.blur}"/>
+            </filter>
+          </defs>
+          <rect x="0" y="0" width="${width}" height="${height}" fill="black"></rect>
+          <rect x="0" y="0" width="${width}" height="${height}" rx="${radius}" fill="url(#red-grad)"/>
+          <rect x="0" y="0" width="${width}" height="${height}" rx="${radius}" fill="url(#blue-grad)" style="mix-blend-mode: ${s.mixBlendMode}"/>
+          <rect x="${edge}" y="${edge}" width="${width - edge * 2}" height="${height - edge * 2}" rx="${radius}" fill="hsl(0 0% ${s.brightness}% / ${s.opacity})" filter="url(#soft)"/>
+        </svg>`;
+        return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+      };
+
+      /* the component's filter markup, built node for node */
+      const buildFilter = (id, s) => {
+        const filter = svgNode('filter', {
           id,
           'color-interpolation-filters': 'sRGB',
           x: '0%', y: '0%', width: '100%', height: '100%'
         });
-        const feImage = node('feImage', {
+        const feImage = svgNode('feImage', {
           x: '0', y: '0', width: '100%', height: '100%',
           preserveAspectRatio: 'none', result: 'map'
         });
-        const channels = [
-          ['red', '1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0'],
-          ['green', '0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0'],
-          ['blue', '0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0']
-        ];
         filter.appendChild(feImage);
-        channels.forEach(([key, matrix]) => {
-          filter.appendChild(node('feDisplacementMap', {
-            in: 'SourceGraphic', in2: 'map', id: `${key}channel`, result: `disp-${key}`,
-            scale: String(settings.distortionScale + settings.offsets[key]),
-            xChannelSelector: 'R', yChannelSelector: 'G'
+        const channels = [
+          ['red', s.offsets.red, '1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0'],
+          ['green', s.offsets.green, '0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0'],
+          ['blue', s.offsets.blue, '0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0']
+        ];
+        channels.forEach(([name, offset, values]) => {
+          filter.appendChild(svgNode('feDisplacementMap', {
+            id: `${name}channel`, in: 'SourceGraphic', in2: 'map', result: `disp${name}`,
+            scale: String(s.distortionScale + offset),
+            xChannelSelector: s.xChannel, yChannelSelector: s.yChannel
           }));
-          filter.appendChild(node('feColorMatrix', { in: `disp-${key}`, type: 'matrix', values: matrix, result: key }));
+          filter.appendChild(svgNode('feColorMatrix', {
+            in: `disp${name}`, type: 'matrix', values, result: name
+          }));
         });
-        filter.appendChild(node('feBlend', { in: 'red', in2: 'green', mode: 'screen', result: 'rg' }));
-        filter.appendChild(node('feBlend', { in: 'rg', in2: 'blue', mode: 'screen', result: 'output' }));
-        filter.appendChild(node('feGaussianBlur', { in: 'output', stdDeviation: String(settings.displace) }));
-        defs.appendChild(filter);
-        return feImage;
-      };
-
-      const displacementMap = (width, height, radius, settings) => {
-        const edge = Math.min(width, height) * settings.borderWidth * 0.5;
-        const inner = {
-          x: edge,
-          y: edge,
-          width: Math.max(1, width - edge * 2),
-          height: Math.max(1, height - edge * 2)
-        };
-        const svg = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">`
-          + '<defs>'
-          + '<linearGradient id="r" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#0000"/><stop offset="100%" stop-color="red"/></linearGradient>'
-          + '<linearGradient id="b" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#0000"/><stop offset="100%" stop-color="blue"/></linearGradient>'
-          + `<filter id="s" filterUnits="userSpaceOnUse" x="0" y="0" width="${width}" height="${height}" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="${settings.blur}" /></filter>`
-          + '</defs>'
-          + `<rect x="0" y="0" width="${width}" height="${height}" fill="black"></rect>`
-          + `<rect x="0" y="0" width="${width}" height="${height}" rx="${radius}" fill="url(#r)" />`
-          + `<rect x="0" y="0" width="${width}" height="${height}" rx="${radius}" fill="url(#b)" style="mix-blend-mode:${settings.mixBlendMode}" />`
-          + `<rect x="${inner.x}" y="${inner.y}" width="${inner.width}" height="${inner.height}" rx="${radius}" fill="hsl(0 0% ${settings.brightness}% / ${settings.opacity})" filter="url(#s)" />`
-          + '</svg>';
-        return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+        filter.appendChild(svgNode('feBlend', { in: 'red', in2: 'green', mode: 'screen', result: 'rg' }));
+        filter.appendChild(svgNode('feBlend', { in: 'rg', in2: 'blue', mode: 'screen', result: 'output' }));
+        filter.appendChild(svgNode('feGaussianBlur', { in: 'output', stdDeviation: String(s.displace) }));
+        return { filter, feImage };
       };
 
       const mount = (selector, options) => {
         const target = document.querySelector(selector);
         if (!target) return;
-        const settings = Object.assign({
+        const s = Object.assign({
           name: 'glass',
-          radius: 24,
+          radius: 20,
           borderWidth: 0.07,
           brightness: 50,
           opacity: 0.93,
           blur: 11,
           displace: 0.5,
           distortionScale: -180,
+          backgroundOpacity: 0.1,
+          saturation: 1,
+          redOffset: 0, greenOffset: 10, blueOffset: 20,
           offsets: { red: 0, green: 10, blue: 20 },
+          xChannel: 'R', yChannel: 'G',
           mixBlendMode: 'difference'
         }, options);
-        const filterId = `glass-filter-${settings.name}`;
-        const feImage = buildFilter(filterId, settings);
-        target.style.setProperty('--glass-filter', `url(#${filterId})`);
-        target.style.setProperty('--glass-saturation', '1');
+
+        const filterId = `glass-filter-${s.name}`;
+        const { filter, feImage } = buildFilter(filterId, s);
+
+        /* DOM order of the component: filter svg → sheen → rim → content */
+        const filterSvg = svgNode('svg', { class: 'glass-surface__filter', xmlns: NS });
+        const defs = svgNode('defs', {});
+        defs.appendChild(filter);
+        filterSvg.appendChild(defs);
+        target.insertBefore(filterSvg, target.firstChild);
+
+        const sheen = document.createElement('span');
+        sheen.className = 'glass-surface__sheen';
+        sheen.setAttribute('aria-hidden', 'true');
+        const rim = document.createElement('span');
+        rim.className = 'glass-surface__rim';
+        rim.setAttribute('aria-hidden', 'true');
+
+        const content = document.createElement('span');
+        content.className = 'glass-surface__content';
+        Array.prototype.slice.call(target.childNodes).forEach((child) => {
+          if (child !== filterSvg) content.appendChild(child);
+        });
+        target.appendChild(sheen);
+        target.appendChild(rim);
+        target.appendChild(content);
+
+        /* inline style object of the component */
+        target.style.setProperty('--glass-frost', String(s.backgroundOpacity));
+        target.style.setProperty('--glass-saturation', String(s.saturation));
+        target.style.setProperty('--filter-id', `url(#${filterId})`);
+        target.style.setProperty('border-radius', `${s.radius}px`);
+        target.classList.add('glass-surface', svgSupported ? 'glass-surface--svg' : 'glass-surface--fallback');
 
         const draw = () => {
           const width = Math.max(2, Math.round(target.offsetWidth));
           const height = Math.max(2, Math.round(target.offsetHeight));
-          const radius = Math.min(settings.radius, height / 2);
           if (target.dataset.glassMap === `${width}x${height}`) return;
           target.dataset.glassMap = `${width}x${height}`;
-          feImage.setAttribute('href', displacementMap(width, height, radius, settings));
+          const radius = Math.min(s.radius, height / 2);
+          feImage.setAttribute('href', displacementMap(width, height, radius, s));
         };
 
         draw();
-        target.classList.add('glass-surface--svg');
         if (typeof ResizeObserver === 'function') new ResizeObserver(draw).observe(target);
         window.addEventListener('resize', draw);
       };
