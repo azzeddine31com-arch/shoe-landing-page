@@ -1141,7 +1141,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #06070a;
+      background: transparent; /* the ::before cover is the only opaque layer */
     }
 
     /* opaque backdrop that covers the video canvas behind the final scene.
@@ -2447,6 +2447,7 @@
       };
       /* the moment the section starts moving back, the collage goes — this
          catches wheel, touch, keyboard and programmatic scrolling alike */
+      let watchTimer = null;
       let settled = false;
       const onScroll = () => {
         if (!sceneOn) return;
@@ -2469,6 +2470,13 @@
         row.classList.add('is-visible');
         settled = story.scrollTop >= sectionTop - 8; /* already parked on the section? */
         story.addEventListener('scroll', onScroll, { passive: true });
+        /* last resort: if any scroll event is ever missed, this still clears the
+           scene instead of leaving it on top of the video */
+        if (watchTimer) window.clearInterval(watchTimer);
+        watchTimer = window.setInterval(() => {
+          if (!sceneOn) { window.clearInterval(watchTimer); watchTimer = null; return; }
+          if (settled && story.scrollTop < sectionTop - 8) hide();
+        }, 220);
       };
 
       const hide = () => {
@@ -2476,6 +2484,7 @@
         sceneOn = false;
         touchStartY = null;
         story.removeEventListener('scroll', onScroll);
+        if (watchTimer) { window.clearInterval(watchTimer); watchTimer = null; }
         row.classList.remove('is-visible');   /* cards drop away first */
         select('grey');                       /* colour always resets to grey */
         if (fadeTimer) window.clearTimeout(fadeTimer);
