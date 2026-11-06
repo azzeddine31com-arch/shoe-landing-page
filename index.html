@@ -2436,7 +2436,7 @@
       const onWheel = (event) => {
         if (!inView) return;
         if (event.deltaY < 0) hide();
-        else if (event.deltaY > 0 && !sceneOn) show();
+        else if (event.deltaY > 0 && !sceneOn) retryShow();
       };
       const onTouchStart = (event) => {
         touchStartY = event.touches.length ? event.touches[0].clientY : null;
@@ -2445,7 +2445,7 @@
         if (!inView || touchStartY === null || !event.touches.length) return;
         const delta = touchStartY - event.touches[0].clientY;
         if (delta < -24 && sceneOn) hide();
-        else if (delta > 24 && !sceneOn) show();
+        else if (delta > 24 && !sceneOn) retryShow();
       };
       /* the moment the section starts moving back, the collage goes — this
          catches wheel, touch, keyboard and programmatic scrolling alike */
@@ -2462,7 +2462,20 @@
       window.addEventListener('touchstart', onTouchStart, { passive: true });
       window.addEventListener('touchmove', onTouchMove, { passive: true });
 
+      /* A forward flick must never bring the collage back on top of a reverse
+         transition that is already playing: wait it out, then only restore the
+         scene if the engine really did stay parked on this section. */
+      let retryTimer = null;
+      const retryShow = () => {
+        if (retryTimer) return;
+        retryTimer = window.setTimeout(() => {
+          retryTimer = null;
+          if (!sceneOn && inView && settled) show();
+        }, 4000);
+      };
+
       const show = () => {
+        if (retryTimer) { window.clearTimeout(retryTimer); retryTimer = null; }
         if (fadeTimer) { window.clearTimeout(fadeTimer); fadeTimer = null; }
         sceneOn = true;
         sectionTop = scene ? scene.offsetTop : 0;
@@ -2487,6 +2500,7 @@
         touchStartY = null;
         story.removeEventListener('scroll', onScroll);
         if (watchTimer) { window.clearInterval(watchTimer); watchTimer = null; }
+        if (retryTimer) { window.clearTimeout(retryTimer); retryTimer = null; }
         row.classList.remove('is-visible');   /* cards drop away first */
         select('grey');                       /* colour always resets to grey */
         if (fadeTimer) window.clearTimeout(fadeTimer);
