@@ -2397,6 +2397,29 @@
         if (frame) frame.classList.toggle('is-final-scene', sceneOn || videoOn);
       };
 
+      /* a backwards scroll gesture clears the scene immediately, no matter how
+         long the engine's reverse transition takes to start (and a forward one
+         brings the scene back if the engine stayed on this section) */
+      let inView = false;
+      let touchStartY = null;
+      const onWheel = (event) => {
+        if (!inView) return;
+        if (event.deltaY < 0) hide();
+        else if (event.deltaY > 0 && !sceneOn) show();
+      };
+      const onTouchStart = (event) => {
+        touchStartY = event.touches.length ? event.touches[0].clientY : null;
+      };
+      const onTouchMove = (event) => {
+        if (!inView || touchStartY === null || !event.touches.length) return;
+        const delta = touchStartY - event.touches[0].clientY;
+        if (delta < -24 && sceneOn) hide();
+        else if (delta > 24 && !sceneOn) show();
+      };
+      window.addEventListener('wheel', onWheel, { passive: true });
+      window.addEventListener('touchstart', onTouchStart, { passive: true });
+      window.addEventListener('touchmove', onTouchMove, { passive: true });
+
       const show = () => {
         if (fadeTimer) { window.clearTimeout(fadeTimer); fadeTimer = null; }
         sceneOn = true;
@@ -2409,8 +2432,9 @@
       const hide = () => {
         if (!sceneOn) return;
         sceneOn = false;
+        touchStartY = null;
         row.classList.remove('is-visible');   /* cards slide back down */
-        select('grey');                       /* colour animates back to grey */
+        select('grey');                       /* colour always resets to grey */
         scene?.classList.remove('is-active'); /* the opaque cover lifts right away */
         if (fadeTimer) window.clearTimeout(fadeTimer);
         fadeTimer = window.setTimeout(() => {
@@ -2421,7 +2445,11 @@
 
       if ('IntersectionObserver' in window) {
         const io = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => (entry.isIntersecting ? show() : hide()));
+          entries.forEach((entry) => {
+            inView = entry.isIntersecting;
+            if (inView) show();
+            else hide();
+          });
         }, { threshold: .9 });
         io.observe(section);
 
