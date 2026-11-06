@@ -108,7 +108,7 @@
     }
 
     /* the closing video is nudged in a touch so its last frame matches the collage */
-    #frame-container.is-final-scene { transform: scale(1.055); }
+    #frame-container.is-final-scene { transform: scale(1.02); }
 
     #frame-container.is-fading { opacity: 0; }
 
@@ -2407,21 +2407,22 @@
       };
 
       const hide = () => {
+        if (!sceneOn) return;
         sceneOn = false;
         row.classList.remove('is-visible');   /* cards slide back down */
         select('grey');                       /* colour animates back to grey */
+        scene?.classList.remove('is-active'); /* the opaque cover lifts right away */
         if (fadeTimer) window.clearTimeout(fadeTimer);
         fadeTimer = window.setTimeout(() => {
-          section.classList.remove('is-visible'); /* collage fades out … */
-          scene?.classList.remove('is-active');   /* … then the video shows */
+          section.classList.remove('is-visible'); /* collage fades out over the video */
           syncZoom();
-        }, 260);
+        }, 120);
       };
 
       if ('IntersectionObserver' in window) {
         const io = new IntersectionObserver((entries) => {
           entries.forEach((entry) => (entry.isIntersecting ? show() : hide()));
-        }, { threshold: .35 });
+        }, { threshold: .9 });
         io.observe(section);
 
         /* keep the closing video slightly zoomed while its own section is up */
