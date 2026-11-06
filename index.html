@@ -1154,7 +1154,7 @@
       background: #06070a;
       content: "";
       opacity: 0;
-      transition: opacity .3s ease;
+      transition: opacity .18s ease;
     }
 
     .color-section.is-active::before { opacity: 1; }
@@ -1167,13 +1167,13 @@
       overflow: hidden;
       opacity: 0;
       visibility: hidden; /* stops the big frames from being composited off-scene */
-      transition: opacity .35s ease, visibility 0s linear .35s;
+      transition: opacity .2s ease, visibility 0s linear .2s;
     }
 
     .shoe-color-preview-section.is-visible {
       opacity: 1;
       visibility: visible;
-      transition: opacity .35s ease;
+      transition: opacity .3s ease;
     }
 
     /* the collage fills the whole scene, edge to edge */
@@ -1192,6 +1192,9 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      /* a hair of zoom so the collage framing matches the closing video */
+      transform: scale(1.03);
+      transform-origin: center;
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
@@ -1230,6 +1233,11 @@
     .color-selectors-container.is-visible .polaroid-slot:nth-child(1) { transition-delay: 0s, 0s; }
     .color-selectors-container.is-visible .polaroid-slot:nth-child(2) { transition-delay: .5s, .5s; }
     .color-selectors-container.is-visible .polaroid-slot:nth-child(3) { transition-delay: 1s, 1s; }
+
+    /* leaving: no stagger, straight down and gone */
+    .color-selectors-container:not(.is-visible) .polaroid-slot {
+      transition: transform .26s cubic-bezier(.55, 0, .9, .4), opacity .18s ease;
+    }
 
     .polaroid-selector {
       position: relative;
@@ -2371,8 +2379,23 @@
       const scene = section.closest('.color-section');
       const row = section.querySelector('.color-selectors-container');
       const frame = document.getElementById('frame-container');
+      const story = document.getElementById('story');
       const buttons = Array.prototype.slice.call(section.querySelectorAll('.polaroid-selector'));
       const images = Array.prototype.slice.call(section.querySelectorAll('.shoe-variant-img'));
+
+      /* warm the three collage frames up while the visitor is still reading,
+         so the scene never opens on an empty (black) frame */
+      const warmUpFrames = () => {
+        images.forEach((img) => {
+          img.loading = 'eager';
+          const loader = new Image();
+          loader.decoding = 'async';
+          loader.src = img.src;
+          if (typeof loader.decode === 'function') loader.decode().catch(() => {});
+        });
+      };
+      if ('requestIdleCallback' in window) requestIdleCallback(warmUpFrames, { timeout: 3000 });
+      else window.setTimeout(warmUpFrames, 1800);
 
       const select = (color) => {
         buttons.forEach((button) => {
@@ -2402,6 +2425,12 @@
          brings the scene back if the engine stayed on this section) */
       let inView = false;
       let touchStartY = null;
+      let sectionTop = 0;
+
+      /* the canvas must already hold a frame before the collage is lifted,
+         otherwise the reveal would flash black while the video spins up */
+      const canvasReady = () => Boolean(frame && frame.style.visibility !== 'hidden' && frame.hasAttribute('data-has-frame'));
+
       const onWheel = (event) => {
         if (!inView) return;
         if (event.deltaY < 0) hide();
@@ -2416,6 +2445,16 @@
         if (delta < -24 && sceneOn) hide();
         else if (delta > 24 && !sceneOn) show();
       };
+      /* the moment the section starts moving back, the collage goes — this
+         catches wheel, touch, keyboard and programmatic scrolling alike */
+      let settled = false;
+      const onScroll = () => {
+        if (!sceneOn) return;
+        const top = story.scrollTop;
+        if (top >= sectionTop - 8) { settled = true; return; }   /* arrived + parked */
+        if (settled) hide();                                      /* heading back */
+      };
+
       window.addEventListener('wheel', onWheel, { passive: true });
       window.addEventListener('touchstart', onTouchStart, { passive: true });
       window.addEventListener('touchmove', onTouchMove, { passive: true });
@@ -2423,24 +2462,29 @@
       const show = () => {
         if (fadeTimer) { window.clearTimeout(fadeTimer); fadeTimer = null; }
         sceneOn = true;
+        sectionTop = scene ? scene.offsetTop : 0;
         section.classList.add('is-visible');
         scene?.classList.add('is-active');
         syncZoom();
         row.classList.add('is-visible');
+        settled = story.scrollTop >= sectionTop - 8; /* already parked on the section? */
+        story.addEventListener('scroll', onScroll, { passive: true });
       };
 
       const hide = () => {
         if (!sceneOn) return;
         sceneOn = false;
         touchStartY = null;
-        row.classList.remove('is-visible');   /* cards slide back down */
+        story.removeEventListener('scroll', onScroll);
+        row.classList.remove('is-visible');   /* cards drop away first */
         select('grey');                       /* colour always resets to grey */
-        scene?.classList.remove('is-active'); /* the opaque cover lifts right away */
         if (fadeTimer) window.clearTimeout(fadeTimer);
-        fadeTimer = window.setTimeout(() => {
-          section.classList.remove('is-visible'); /* collage fades out over the video */
+        const reveal = () => {
+          scene?.classList.remove('is-active');   /* opaque cover lifts … */
+          section.classList.remove('is-visible'); /* … and the collage fades out */
           syncZoom();
-        }, 120);
+        };
+        fadeTimer = window.setTimeout(reveal, canvasReady() ? 40 : 160);
       };
 
       if ('IntersectionObserver' in window) {
