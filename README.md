@@ -8,10 +8,10 @@ A single-page, self-contained landing page (HTML + CSS + vanilla JS). **No build
 ├── _headers                   ← Cloudflare Pages cache/security headers
 ├── Color section/
 │   ├── assets/                ← three collage frames used by the colour scene (webp)
-│   └── Bg *.jpg|webp          ← source masters (not referenced by the page)
+│   └── Bg *.webp              ← full-resolution masters (not referenced by the page)
 ├── Form/assets/               ← torn paper frame, price ticket, button texture…
 ├── Main video/
-│   ├── hero-*.avif|webp       ← hero poster
+│   ├── hero-1080.webp / hero-1440.webp   ← hero poster (srcset, 1080w / 1440w)
 │   ├── transitions/           ← 11 × forward + reverse clips + section anchors
 │   └── Video 1…11.mp4         ← source clips the transitions were cut from (not referenced)
 ├── tools/check-assets.py      ← verifies every reference resolves, case-sensitively
@@ -59,7 +59,8 @@ It prints `all references resolve` when every static reference **and** every tra
 ## Notes
 
 - Fonts load from Google Fonts (`Alexandria`, `Tajawal`, `Titan One`); everything else is local.
-- `_headers` sets long-lived immutable caching for `.webp` / `.avif` / `.mp4` and revalidates `index.html` on every deploy.
+- `_headers` sets long-lived immutable caching for `.webp` / `.mp4` and revalidates `index.html` on every deploy.
+- Every image in the project is **WebP** (no PNG/JPEG/AVIF sources are kept); `index.html` never references another image format.
 - The repository also keeps design sources and the master video clips (~160 MB). They are **not referenced** by the page; Cloudflare deploys them but never serves them. Delete them if you want faster uploads — `tools/check-assets.py` will confirm nothing breaks.
 
 ---
