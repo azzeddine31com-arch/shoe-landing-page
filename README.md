@@ -7,16 +7,17 @@ A single-page, self-contained landing page (HTML + CSS + vanilla JS). **No build
 ├── index.html                 ← the whole page (markup, CSS and JS inline)
 ├── _headers                   ← Cloudflare Pages cache/security headers
 ├── Color section/
-│   └── assets/                ← three collage frames used by the colour scene (webp)
+│   ├── assets/                ← three collage frames used by the colour scene (webp)
+│   └── Bg *.webp              ← full-resolution masters (not referenced by the page)
 ├── Form/assets/               ← torn paper frame, price ticket, button texture…
 ├── Main video/
 │   ├── hero-1080.webp / hero-1440.webp   ← hero poster (srcset, 1080w / 1440w)
-│   └── transitions/           ← 11 × forward + reverse clips + section anchors
-└── tools/check-assets.py      ← verifies every reference resolves, case-sensitively
+│   ├── transitions/           ← 11 × forward + reverse clips + section anchors
+│   └── Video 1…11.mp4         ← source clips the transitions were cut from (not referenced)
+├── tools/check-assets.py      ← verifies every reference resolves, case-sensitively
+├── cta button example.mp4     ← design reference (not referenced)
+└── example website.mp4        ← design reference (not referenced)
 ```
-
-Every file in the repository is served by the page (total ≈ 26 MB), so a deploy
-uploads exactly what the site needs and nothing else.
 
 ## Deploy on Cloudflare Pages
 
@@ -60,7 +61,7 @@ It prints `all references resolve` when every static reference **and** every tra
 - Fonts load from Google Fonts (`Alexandria`, `Tajawal`, `Titan One`); everything else is local.
 - `_headers` sets long-lived immutable caching for `.webp` / `.mp4` and revalidates `index.html` on every deploy.
 - Every image in the project is **WebP** (no PNG/JPEG/AVIF sources are kept); `index.html` never references another image format.
-- The repository contains **no unused files**: design references, the original `Video 1…11.mp4` masters and the duplicated PNG/JPEG/AVIF sources were removed once the page stopped referencing them (they remain in git history). Run `python3 tools/check-assets.py` after any edit.
+- The repository also keeps design sources and the master video clips (~160 MB). They are **not referenced** by the page; Cloudflare deploys them but never serves them. Delete them if you want faster uploads — `tools/check-assets.py` will confirm nothing breaks.
 
 ---
 
