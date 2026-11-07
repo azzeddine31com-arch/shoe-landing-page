@@ -1228,67 +1228,191 @@
       transition: opacity .45s ease;
     }
 
-    /* swatches + order button share one bottom panel */
+    /* paper order button on top, colour cards underneath, all anchored low */
     .color-ui-panel {
       position: absolute;
-      bottom: calc(5svh + env(safe-area-inset-bottom, 0px));
+      bottom: calc(3svh + env(safe-area-inset-bottom, 0px));
       left: 50%;
       z-index: 30;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: clamp(10px, 3vw, 16px);
-      width: 90%;
-      max-width: 400px;
+      gap: clamp(22px, 6vw, 30px);
+      width: 92%;
+      max-width: 420px;
       transform: translateX(-50%);
     }
 
     .color-selectors-container {
       display: flex;
-      gap: clamp(10px, 3.2vw, 18px);
+      gap: clamp(12px, 3.6vw, 20px);
     }
 
-    /* order button: same paper plaque as the checkout form's submit button */
-    .color-section-cta {
+    /* ---------- torn paper order button ----------
+       A square paper ticket pinned to the top-left corner: measured against the
+       three collage frames that is the calmest area of the scene (lowest edge
+       detail, no shoe, no face), and the FAQ button already owns the top-right.
+       Drawn entirely in CSS — the checkout form's plaque keeps its texture. */
+    .paper-cta-wrap {
+      position: absolute;
+      /* same inset as #faq-fab on the opposite corner */
+      top: calc(14px + env(safe-area-inset-top, 0px));
+      left: 14px;
+      z-index: 31;
+      width: clamp(98px, 27vw, 128px);
+      height: clamp(98px, 27vw, 128px);
+      /* drop-shadow follows the torn outline (box-shadow would be clipped) */
+      filter: drop-shadow(0 9px 16px rgba(0, 0, 0, .5));
+      opacity: 0;
+      transform: translateY(-16px) rotate(-9deg) scale(.88);
+      transition: opacity .5s cubic-bezier(.16, 1, .3, 1) .14s, transform .64s cubic-bezier(.16, 1, .3, 1) .14s;
+    }
+
+    .shoe-color-preview-section.is-visible .paper-cta-wrap {
+      opacity: 1;
+      transform: translateY(0) rotate(-3.5deg) scale(1);
+    }
+
+    /* leaving with the scene: same fast exit as the cards */
+    .shoe-color-preview-section:not(.is-visible) .paper-cta-wrap {
+      transition: opacity .18s ease, transform .26s ease;
+    }
+
+    /* a strip of tape holding the ticket to the wall (same motif as the cards) */
+    .paper-cta-wrap::after {
+      position: absolute;
+      top: -7px;
+      left: 50%;
+      width: 40px;
+      height: 13px;
+      background: rgba(233, 227, 212, .8);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .35);
+      content: "";
+      pointer-events: none;
+      transform: translateX(-50%) rotate(-4deg);
+    }
+
+    .paper-cta {
+      position: relative;
       display: flex;
-      gap: 12px;
+      flex-direction: column;
+      gap: 5px;
       align-items: center;
       justify-content: center;
       width: 100%;
-      min-height: 50px;
-      aspect-ratio: 5.3 / 1;
-      padding: 0 10px;
+      height: 100%;
+      padding: 10px 9px;
       border: none;
       outline: none;
-      background-color: transparent;
-      background-image: url('Form/assets/button-texture.webp');
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: 100% 100%;
-      color: #111111;
+      /* paper: warm cream + faint fibres, slightly darker at the torn foot */
+      background-color: #f4ecda;
+      background-image:
+        repeating-linear-gradient(112deg, rgba(122, 96, 58, .045) 0 1px, rgba(255, 255, 255, 0) 1px 6px),
+        linear-gradient(172deg, #fdf9ef 0%, #f4ecda 52%, #e6dbc2 100%);
+      color: #241b12;
       cursor: pointer;
       font-family: var(--font-headline);
-      font-size: clamp(16px, 4.6vw, 20px);
+      clip-path: polygon(
+        0.0% 1.6%,
+        8.3% 1.8%,
+        16.7% 2.6%,
+        25.0% 1.6%,
+        33.3% 1.7%,
+        41.7% 1.9%,
+        50.0% 1.0%,
+        58.3% 1.7%,
+        66.7% 2.0%,
+        75.0% 2.3%,
+        83.3% 0.8%,
+        91.7% 1.3%,
+        100.0% 1.8%,
+        99.2% 8.3%,
+        97.6% 16.7%,
+        97.9% 25.0%,
+        99.3% 33.3%,
+        97.2% 41.7%,
+        97.3% 50.0%,
+        98.0% 58.3%,
+        98.0% 66.7%,
+        99.1% 75.0%,
+        99.4% 83.3%,
+        98.2% 91.7%,
+        98.8% 100.0%,
+        91.7% 99.0%,
+        83.3% 98.9%,
+        75.0% 99.3%,
+        66.7% 98.4%,
+        58.3% 98.4%,
+        50.0% 97.5%,
+        41.7% 98.3%,
+        33.3% 98.0%,
+        25.0% 98.3%,
+        16.7% 97.9%,
+        8.3% 98.4%,
+        0.0% 98.6%,
+        2.8% 91.7%,
+        2.8% 83.3%,
+        2.4% 75.0%,
+        2.2% 66.7%,
+        1.3% 58.3%,
+        1.1% 50.0%,
+        1.2% 41.7%,
+        0.8% 33.3%,
+        2.3% 25.0%,
+        1.5% 16.7%,
+        2.5% 8.3%
+      );
+      transition: filter .2s ease, transform .2s ease;
+    }
+
+    /* ink-stamp circle with the arrow, stacked above the wording */
+    .paper-cta-go {
+      display: grid;
+      flex: 0 0 auto;
+      place-items: center;
+      width: clamp(24px, 6.8vw, 29px);
+      height: clamp(24px, 6.8vw, 29px);
+      border: 1.6px solid rgba(214, 78, 12, .72);
+      border-radius: 50%;
+      color: #d64e0c;
+      transform: rotate(-8deg);
+      transition: transform .24s ease, background-color .24s ease;
+    }
+
+    .paper-cta-go svg { width: 64%; height: 64%; }
+
+    .paper-cta-title {
+      font-size: clamp(13px, 3.7vw, 16px);
       font-weight: 900;
       line-height: 1;
-      filter: brightness(1.1) contrast(.97);
-      opacity: 0;
-      transform: translateY(35px);
-      transition: opacity .6s cubic-bezier(.16, 1, .3, 1) .45s, transform .6s cubic-bezier(.16, 1, .3, 1) .45s;
+      letter-spacing: -.01em;
+      color: #1b140d;
     }
 
-    .color-ui-panel.is-visible .color-section-cta {
-      opacity: 1;
-      transform: translateY(0);
+    .paper-cta-sub {
+      font-family: var(--font-body, inherit);
+      font-size: clamp(7.5px, 2.1vw, 9px);
+      font-weight: 600;
+      letter-spacing: .02em;
+      line-height: 1.2;
+      color: #7a6547;
+      text-align: center;
     }
 
-    .color-section-cta:active { transform: translateY(1px) scale(.97); }
+    .paper-cta:hover .paper-cta-go,
+    .paper-cta:focus-visible .paper-cta-go {
+      background-color: rgba(214, 78, 12, .1);
+      transform: rotate(-8deg) translateX(-2px);
+    }
 
-    .color-section-cta-icon { flex: 0 0 auto; width: clamp(19px, 5.4vw, 25px); height: auto; }
+    .paper-cta:active {
+      transform: translateY(2px) rotate(.4deg);
+      filter: brightness(.97);
+    }
 
-    /* leaving with the scene: same fast exit as the cards */
-    .color-ui-panel:not(.is-visible) .color-section-cta {
-      transition: opacity .18s ease, transform .26s ease;
+    .paper-cta:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 3px;
     }
 
     /* wrapper carries the slide-up entrance so the button keeps its own transform */
@@ -1316,9 +1440,9 @@
     .polaroid-selector {
       position: relative;
       display: block;
-      width: clamp(80px, 22vw, 108px);
-      height: clamp(98px, 27vw, 132px);
-      padding: 9px 9px 20px;
+      width: clamp(96px, 26vw, 124px);
+      height: clamp(118px, 32vw, 152px);
+      padding: 10px 10px 22px;
       border: none;
       background-color: #fff;
       box-shadow: 0 8px 20px rgba(0, 0, 0, .4);
@@ -1341,8 +1465,8 @@
       position: absolute;
       top: -8px;
       left: 50%;
-      width: 30px;
-      height: 12px;
+      width: 34px;
+      height: 13px;
       border-radius: 2px;
       background-color: rgba(40, 40, 40, .7);
       transform: translateX(-50%);
@@ -1362,7 +1486,7 @@
 
     .polaroid-selector.active {
       z-index: 2;
-      transform: translateY(-12px) scale(1.12);
+      transform: translateY(-8px) scale(1.09);
       box-shadow: 0 16px 32px rgba(0, 0, 0, .65), 0 0 0 3px #FF7A00;
     }
 
@@ -1683,6 +1807,20 @@
           <img class="shoe-variant-img active" data-color="grey" src="Color%20section/assets/grey.webp" alt="حذاء أمان رمادي" decoding="async" loading="lazy">
           <img class="shoe-variant-img" data-color="black" src="Color%20section/assets/black.webp" alt="حذاء أمان أسود" decoding="async" loading="lazy">
 
+          <div class="paper-cta-wrap">
+            <button class="paper-cta" id="color-buy-now-btn" type="button">
+              <span class="paper-cta-go" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="19" y1="12" x2="5" y2="12"></line>
+                  <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+              </span>
+              <span class="paper-cta-title">اطلب الآن</span>
+              <span class="paper-cta-sub">الدفع عند الاستلام</span>
+            </button>
+          </div>
+
           <div class="color-ui-panel">
             <div class="color-selectors-container" role="group" aria-label="اختر لون الحذاء">
             <span class="polaroid-slot">
@@ -1704,15 +1842,6 @@
               </button>
             </span>
             </div>
-
-            <button class="color-section-cta" id="color-buy-now-btn" type="button">
-              <span>إتمام الطلب</span>
-              <svg class="color-section-cta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <line x1="22" y1="2" x2="11" y2="13"></line>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-              </svg>
-            </button>
           </div>
         </div>
 
