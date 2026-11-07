@@ -1227,14 +1227,67 @@
       transition: opacity .45s ease;
     }
 
-    .color-selectors-container {
+    /* swatches + order button share one bottom panel */
+    .color-ui-panel {
       position: absolute;
-      bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+      bottom: calc(5svh + env(safe-area-inset-bottom, 0px));
       left: 50%;
-      z-index: 10;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(10px, 3vw, 16px);
+      width: 90%;
+      max-width: 400px;
+      transform: translateX(-50%);
+    }
+
+    .color-selectors-container {
       display: flex;
       gap: clamp(10px, 3.2vw, 18px);
-      transform: translateX(-50%);
+    }
+
+    /* order button: same paper plaque as the checkout form's submit button */
+    .color-section-cta {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 50px;
+      aspect-ratio: 5.3 / 1;
+      padding: 0 10px;
+      border: none;
+      outline: none;
+      background-color: transparent;
+      background-image: url('Form/assets/button-texture.webp');
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      color: #111111;
+      cursor: pointer;
+      font-family: var(--font-headline);
+      font-size: clamp(16px, 4.6vw, 20px);
+      font-weight: 900;
+      line-height: 1;
+      filter: brightness(1.1) contrast(.97);
+      opacity: 0;
+      transform: translateY(35px);
+      transition: opacity .6s cubic-bezier(.16, 1, .3, 1) .45s, transform .6s cubic-bezier(.16, 1, .3, 1) .45s;
+    }
+
+    .color-ui-panel.is-visible .color-section-cta {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .color-section-cta:active { transform: translateY(1px) scale(.97); }
+
+    .color-section-cta-icon { flex: 0 0 auto; width: clamp(19px, 5.4vw, 25px); height: auto; }
+
+    /* leaving with the scene: same fast exit as the cards */
+    .color-ui-panel:not(.is-visible) .color-section-cta {
+      transition: opacity .18s ease, transform .26s ease;
     }
 
     /* wrapper carries the slide-up entrance so the button keeps its own transform */
@@ -1627,7 +1680,8 @@
           <img class="shoe-variant-img active" data-color="grey" src="Color%20section/assets/grey.webp" alt="حذاء أمان رمادي" decoding="async" loading="lazy">
           <img class="shoe-variant-img" data-color="black" src="Color%20section/assets/black.webp" alt="حذاء أمان أسود" decoding="async" loading="lazy">
 
-          <div class="color-selectors-container" role="group" aria-label="اختر لون الحذاء">
+          <div class="color-ui-panel">
+            <div class="color-selectors-container" role="group" aria-label="اختر لون الحذاء">
             <span class="polaroid-slot">
               <button class="polaroid-selector" type="button" data-target-color="blue" aria-label="اختر اللون الأزرق" aria-pressed="false">
                 <span class="tape-effect" aria-hidden="true"></span>
@@ -1646,6 +1700,16 @@
                 <span class="color-box black-box"></span>
               </button>
             </span>
+            </div>
+
+            <button class="color-section-cta" id="color-buy-now-btn" type="button">
+              <span>إتمام الطلب</span>
+              <svg class="color-section-cta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
           </div>
         </div>
 
@@ -2399,6 +2463,8 @@
       if (!section) return;
       const scene = section.closest('.color-section');
       const row = section.querySelector('.color-selectors-container');
+      const panel = section.querySelector('.color-ui-panel');
+      const cta = document.querySelector('#color-buy-now-btn');
       const frame = document.getElementById('frame-container');
       const story = document.getElementById('story');
       const buttons = Array.prototype.slice.call(section.querySelectorAll('.polaroid-selector'));
@@ -2418,7 +2484,23 @@
       if ('requestIdleCallback' in window) requestIdleCallback(warmUpFrames, { timeout: 3000 });
       else window.setTimeout(warmUpFrames, 1800);
 
+      const FORM_COLORS = { grey: 'رمادي', black: 'أسود', blue: null };
+
+      if (cta) {
+        cta.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const formColor = FORM_COLORS[currentColor];
+          if (formColor) {
+            const radio = document.querySelector('#order-form input[name="color"][value="' + formColor + '"]');
+            if (radio) radio.checked = true;
+          }
+          if (typeof window.scrollToOrderForm === 'function') window.scrollToOrderForm();
+        });
+      }
+
       const select = (color) => {
+        currentColor = color;
         buttons.forEach((button) => {
           const isActive = button.getAttribute('data-target-color') === color;
           button.classList.toggle('active', isActive);
@@ -2436,6 +2518,7 @@
          no layout reads per frame (that is what made scrolling heavy) */
       let sceneOn = false;
       let videoOn = false;
+      let currentColor = 'grey';
       let fadeTimer = null;
       const syncZoom = () => {
         if (frame) frame.classList.toggle('is-final-scene', sceneOn || videoOn);
@@ -2502,6 +2585,7 @@
         scene?.classList.add('is-active');
         syncZoom();
         row.classList.add('is-visible');
+        panel?.classList.add('is-visible');
         settled = story.scrollTop >= sectionTop - 8; /* already parked on the section? */
         story.addEventListener('scroll', onScroll, { passive: true });
         /* last resort: if any scroll event is ever missed, this still clears the
@@ -2521,6 +2605,7 @@
         if (watchTimer) { window.clearInterval(watchTimer); watchTimer = null; }
         if (retryTimer) { window.clearTimeout(retryTimer); retryTimer = null; }
         row.classList.remove('is-visible');   /* cards drop away first */
+        panel?.classList.remove('is-visible');
         select('grey');                       /* colour always resets to grey */
         if (fadeTimer) window.clearTimeout(fadeTimer);
         const reveal = () => {
