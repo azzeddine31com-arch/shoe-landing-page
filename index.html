@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#090a0f">
   <title>OBIDER | حذاء أمان بخفة رياضية</title>
-  <link rel="preload" href="Main%20video/hero-1080-edc27943d1ea.avif" as="image" type="image/avif" fetchpriority="high">
+  <link rel="preload" href="Main%20video/hero-1080.webp" as="image" type="image/webp" media="(max-width: 700px)" fetchpriority="high">
+  <link rel="preload" href="Main%20video/hero-1440.webp" as="image" type="image/webp" media="(min-width: 701px)" fetchpriority="high">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@600;700&family=Tajawal:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@600;700&family=Tajawal:wght@400;500&family=Titan+One&display=swap" rel="stylesheet">
   <style>
     :root {
       color-scheme: dark;
@@ -103,9 +104,12 @@
       visibility: hidden;
       opacity: 1;
       pointer-events: none;
-      transition: opacity 200ms ease-out;
+      transition: opacity 200ms ease-out, transform .6s ease;
       background: #000;
     }
+
+    /* the closing video is nudged in a touch so its last frame matches the collage */
+    #frame-container.is-final-scene { transform: scale(1.02); }
 
     #frame-container.is-fading { opacity: 0; }
 
@@ -216,6 +220,24 @@
     }
 
     .dynamic-text-stage.technical-section .highlight { color: #00e5ff; }
+
+    /* the tag, the heading and the body rise one after another.
+       Scoped to the engine's stages, so the hero copy is untouched. */
+    .dynamic-text-stage > .feature-tag,
+    .dynamic-text-stage > h2,
+    .dynamic-text-stage > .copy-body {
+      transform: translateY(0);
+      transition: transform .65s cubic-bezier(.16, 1, .3, 1);
+      will-change: transform;
+    }
+
+    .dynamic-text-stage > h2 { transition-delay: .09s; }
+    .dynamic-text-stage > .copy-body { transition-delay: .2s; }
+
+    /* only the incoming state is offset, so the outgoing copy still leaves upward */
+    .dynamic-text-stage.text-stage-hidden-bottom > .feature-tag { transform: translateY(10px); }
+    .dynamic-text-stage.text-stage-hidden-bottom > h2 { transform: translateY(16px); }
+    .dynamic-text-stage.text-stage-hidden-bottom > .copy-body { transform: translateY(22px); }
 
     .ui-container {
       transition: opacity .2s ease-out, transform .2s ease-out;
@@ -418,23 +440,72 @@
       50% { transform: translateY(5px) rotate(45deg); }
     }
 
-    .btn-form-submit {
+    /* ---------- Amplified Liquid Glass (pinned CTA + pinned "?") ---------- */
+    .liquid-glass-element {
+      position: fixed;
+      z-index: 100;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 100%;
-      min-height: 52px;
-      margin: 12px 0 0;
-      border: 0;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #ffd700, #ff9900);
-      color: #090a0f;
       cursor: pointer;
-      font-family: var(--font-body);
-      font-weight: 700;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(16px) saturate(1.5);
+      -webkit-backdrop-filter: blur(16px) saturate(1.5);
+      box-shadow:
+        inset 0 1.5px 1px rgba(255, 255, 255, 0.7),
+        inset 0 -1.5px 1px rgba(255, 255, 255, 0.4),
+        inset 0 0 15px 3px rgba(255, 255, 255, 0.15),
+        0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #FFFFFF;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+      transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .liquid-glass-element:active { transform: scale(0.95); }
+
+    .liquid-glass-element::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.4) 0%,
+        transparent 35%,
+        transparent 65%,
+        rgba(255, 255, 255, 0.15) 100%
+      );
+    }
+
+    .liquid-cta {
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 400px;
+      padding: 16px 24px;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .liquid-cta:active { transform: translateX(-50%) scale(0.95); }
+
+    .liquid-faq {
+      top: 24px;
+      right: 24px;
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      font-size: 24px;
+      font-weight: 900;
     }
 
     .sticky-floating-pill {
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -442,13 +513,9 @@
       max-width: 380px;
       height: 56px;
       margin: 0;
-      padding: 8px 18px;
-      border: 1px solid rgba(255, 122, 0, .4);
-      border-radius: 99px;
-      background: rgba(255, 90, 0, .15);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, .2);
+      padding: 0 20px;
+      border: 0;
+      border-radius: 50px;
       color: #fff;
       cursor: pointer;
       font-family: var(--font-headline);
@@ -456,10 +523,49 @@
       font-weight: 700;
       line-height: 1.25;
       text-align: center;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, .45);
     }
 
-    .sticky-floating-pill:focus-visible, .btn-form-submit:focus-visible,
-    .close-dialog:focus-visible, input:focus-visible, select:focus-visible {
+    /* floating "?" trigger: same glass surface as the pinned CTA */
+    #faq-fab {
+      position: absolute;
+      top: calc(14px + env(safe-area-inset-top, 0px));
+      right: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 55px;
+      height: 55px;
+      padding: 0 0 3px;
+      border: 0;
+      border-radius: 50%;
+      color: #ffc46b;
+      cursor: pointer;
+      font-family: 'Titan One', var(--font-headline), sans-serif;
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 1;
+      pointer-events: auto;
+      text-shadow: 0 0 14px rgba(255, 177, 77, .55), 0 2px 6px rgba(0, 0, 0, .5);
+      transition: opacity .5s cubic-bezier(.4, 0, .2, 1), transform .5s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    #faq-fab.hidden-in-hero {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-12px) scale(.94);
+    }
+
+    #faq-fab.visible-in-scroll {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0) scale(1);
+    }
+
+    #faq-fab:active.visible-in-scroll { transform: translateY(0) scale(.95); }
+
+    .sticky-floating-pill:focus-visible, .image-backed-cta:focus-visible,
+    #faq-fab:focus-visible, .close-dialog:focus-visible, .gf-qty-btn:focus-visible {
       outline: 3px solid #fff;
       outline-offset: 3px;
     }
@@ -488,49 +594,1032 @@
 
     #sticky-cta:active.visible-in-scroll { transform: translateY(0) scale(.985); }
 
-    #order-dialog {
-      width: min(100% - 28px, 530px);
-      max-width: 530px;
-      max-height: min(92svh, 900px);
+    /* the pasted .liquid-cta centres itself with translateX(-50%); this button is centred by
+       left/right:0 + auto margins so its existing fade/slide animation stays intact */
+    #sticky-cta.liquid-cta {
+      left: 0;
+      right: 0;
+      margin-inline: auto;
+      transform: none;
+    }
+
+    #sticky-cta.liquid-cta.hidden-in-hero { transform: translateY(20px); }
+    #sticky-cta.liquid-cta.visible-in-scroll { transform: translateY(0); }
+    #sticky-cta.liquid-cta:active.visible-in-scroll { transform: translateY(0) scale(.95); }
+
+    /* ---------- Order dialog · torn-paper grunge form ---------- */
+    #order-dialog,
+    #faq-dialog {
+      width: min(100% - 16px, 560px);
+      max-width: 560px;
+      max-height: 96svh;
       padding: 0;
       overflow: hidden;
-      border: 1px solid rgba(255, 215, 0, .45);
-      border-radius: 22px;
-      background: #0b0d11;
-      color: var(--text-primary);
-      box-shadow: 0 24px 90px rgba(0,0,0,.75), 0 0 34px rgba(255,215,0,.12);
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: #fff;
     }
 
-    #order-dialog::backdrop { background: rgba(0,0,0,.76); backdrop-filter: blur(8px); }
+    #order-dialog[open],
+    #faq-dialog[open] { animation: dialog-in .3s cubic-bezier(.2, .8, .2, 1) both; }
+
+    @keyframes dialog-in {
+      from { opacity: 0; transform: translateY(12px) scale(.985); }
+      to { opacity: 1; transform: none; }
+    }
+
+    #order-dialog::backdrop,
+    #faq-dialog::backdrop {
+      background:
+        linear-gradient(rgba(4, 5, 8, .78), rgba(4, 5, 8, .9)),
+        url('Form/assets/backdrop.webp') center / cover no-repeat;
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+
+    .order-shell { position: relative; display: flex; max-height: 96svh; }
+
+    .close-dialog {
+      position: absolute;
+      z-index: 5;
+      top: 12px;
+      left: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, .22);
+      border-radius: 50%;
+      background: rgba(10, 10, 12, .62);
+      color: #fff;
+      cursor: pointer;
+      font-size: 19px;
+      line-height: 1;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
 
     .order-scroll {
-      max-height: min(92svh, 900px);
+      width: 100%;
+      max-height: 96svh;
+      padding: 6px 0 14px;
       overflow-y: auto;
-      padding: 22px 20px 20px;
-      scrollbar-color: #66530c #111;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: #4a4a4a transparent;
     }
 
-    .order-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom: 17px; }
-    .order-heading h2 { margin: 0 0 4px; font-size: 25px; }
-    .order-heading p { margin: 0; color: var(--text-secondary); font-size: 14px; }
-    .close-dialog { flex: 0 0 auto; width: 38px; height: 38px; border: 1px solid rgba(255,255,255,.17); border-radius: 50%; background:#171a20; color:#fff; cursor:pointer; font-size:22px; line-height:1; }
-    .order-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    .field { display:flex; flex-direction:column; gap:6px; min-width:0; }
-    .field.full { grid-column:1/-1; }
-    .field label, .field-label { color:#e7eaf0; font-size:13px; font-weight:700; }
-    .field input, .field select { width:100%; min-height:46px; padding:10px 12px; border:1px solid rgba(203,213,225,.28); border-radius:11px; background:#11151b; color:#fff; }
-    .field input::placeholder { color:#788391; }
-    .color-options { display:flex; flex-wrap:wrap; gap:8px; }
-    .color-option { display:flex; align-items:center; gap:7px; padding:8px 10px; border:1px solid rgba(203,213,225,.25); border-radius:999px; color:#e8ecf2; font-size:13px; cursor:pointer; }
-    .color-option:has(input:checked) { border-color:var(--accent-gold); color:var(--accent-gold); }
-    .color-option input { accent-color:var(--accent-gold); }
-    .order-note { margin:13px 0 0; color:var(--text-muted); font-size:12px; line-height:1.55; }
-    #order-status { min-height:20px; margin:9px 0 0; color:#f4d767; font-size:13px; }
+    .grunge-card {
+      container-type: inline-size;
+      position: relative;
+      width: 100%;
+      padding: 15% 9.5% 9.5%;
+      background: url('Form/assets/torn-paper-frame.webp') center / 100% 100% no-repeat;
+      color: #fff;
+      font-family: var(--font-body);
+    }
+
+    .gf-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* header ------------------------------------------------------------- */
+    .gf-head {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.8cqw;
+      margin-bottom: 5.4cqw;
+    }
+
+    .gf-title {
+      display: block;
+      width: 47%;
+      max-width: 250px;
+      height: auto;
+      filter: drop-shadow(0 2px 7px rgba(0, 0, 0, .55));
+    }
+
+    .gf-sub {
+      margin: 0;
+      color: #eef1f4;
+      font-size: clamp(11px, 3.05cqw, 18px);
+      font-weight: 500;
+      line-height: 1.55;
+      text-align: center;
+    }
+
+    /* fields ------------------------------------------------------------- */
+    .gf-fields { display: flex; flex-direction: column; gap: 3.2cqw; }
+
+    .gf-field {
+      display: flex;
+      align-items: center;
+      gap: 3.2cqw;
+      min-height: clamp(56px, 13.4cqw, 78px);
+      padding: 2cqw 3.2cqw;
+      border: 1px solid rgba(198, 204, 212, .42);
+      border-radius: 1.6cqw;
+      background: rgba(255, 255, 255, .012);
+      cursor: text;
+      transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+
+    .gf-field:hover { border-color: rgba(220, 226, 234, .62); }
+
+    .gf-field:focus-within {
+      border-color: rgba(255, 255, 255, .85);
+      background: rgba(255, 255, 255, .035);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, .16), 0 0 22px rgba(255, 255, 255, .07);
+    }
+
+    .gf-field.has-error { border-color: rgba(255, 107, 87, .85); }
+
+    .gf-body { display: flex; flex: 1 1 auto; flex-direction: column; gap: .5cqw; min-width: 0; }
+
+    .gf-label {
+      display: flex;
+      align-items: center;
+      gap: .7cqw;
+      color: #fff;
+      font-family: var(--font-headline);
+      font-size: clamp(13px, 3.5cqw, 20px);
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .gf-label .req { color: #ff8a33; font-size: .85em; font-weight: 700; }
+
+    .gf-input {
+      width: 100%;
+      min-width: 0;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: clamp(12px, 3.3cqw, 19px);
+      font-weight: 500;
+      line-height: 1.5;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .gf-input::placeholder { color: #8d939b; opacity: 1; }
+    .gf-input:focus-visible { outline: none; }
+    .gf-input:-webkit-autofill { -webkit-text-fill-color: #fff; transition: background-color 9999s ease-in-out 0s; }
+
+    .gf-select { color: #8d939b; cursor: pointer; text-overflow: ellipsis; }
+    .gf-select:valid { color: #fff; }
+    .gf-select option { color: #12141a; background: #f4f4f4; }
+
+    .gf-icon {
+      flex: 0 0 auto;
+      width: clamp(17px, 4.9cqw, 27px);
+      height: clamp(17px, 4.9cqw, 27px);
+      color: #fff;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: .92;
+    }
+
+    .gf-chevron {
+      width: clamp(14px, 4cqw, 22px);
+      height: clamp(14px, 4cqw, 22px);
+      opacity: .82;
+    }
+
+    /* groups (colour / size / quantity) ---------------------------------- */
+    .gf-group { margin: 5.2cqw 0 0; }
+
+    .gf-legend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 2.6cqw;
+      color: #fff;
+      font-family: var(--font-headline);
+      font-size: clamp(12.5px, 3.4cqw, 19px);
+      font-weight: 700;
+      line-height: 1.3;
+      text-align: center;
+    }
+
+    .gf-legend-text { display: inline-block; }
+    .gf-legend .req { color: #ff8a33; font-size: .85em; font-weight: 700; line-height: 1; }
+
+    .gf-legend .gf-icon {
+      width: clamp(15px, 4.2cqw, 23px);
+      height: clamp(15px, 4.2cqw, 23px);
+    }
+
+    .gf-swatches { display: flex; align-items: center; justify-content: center; gap: 3.4cqw; }
+
+    .gf-swatch {
+      position: relative;
+      display: block;
+      width: clamp(26px, 6.4cqw, 36px);
+      height: clamp(26px, 6.4cqw, 36px);
+      cursor: pointer;
+    }
+
+    .gf-swatch input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .gf-dot {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: var(--dot, #fff);
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .35), 0 2px 6px rgba(0, 0, 0, .45);
+      transition: box-shadow .2s ease, transform .2s ease;
+    }
+
+    .gf-swatch:hover .gf-dot { transform: scale(1.05); }
+
+    .gf-swatch input:checked + .gf-dot {
+      box-shadow:
+        0 0 0 2px #fff,
+        0 0 0 5px rgba(255, 255, 255, .16),
+        0 0 18px 2px rgba(255, 255, 255, .5),
+        inset 0 0 0 1px rgba(0, 0, 0, .25);
+    }
+
+    .gf-swatch input:focus-visible + .gf-dot {
+      box-shadow: 0 0 0 2px #ffd27a, 0 0 16px rgba(255, 210, 122, .6);
+    }
+
+    .gf-sizes {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.8cqw;
+      direction: ltr;
+    }
+
+    .gf-size {
+      position: relative;
+      display: block;
+      width: clamp(34px, 6.6cqw, 44px);
+      height: clamp(34px, 6.6cqw, 44px);
+      cursor: pointer;
+    }
+
+    .gf-size input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .gf-size span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      border: 1px solid rgba(198, 204, 212, .5);
+      border-radius: 1.2cqw;
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: clamp(12px, 3.1cqw, 18px);
+      font-weight: 600;
+      transition: background .18s ease, color .18s ease, border-color .18s ease;
+    }
+
+    .gf-size:hover span { border-color: rgba(255, 255, 255, .8); }
+
+    .gf-size input:checked + span {
+      border-color: #f2f3f4;
+      background: #f2f3f4;
+      color: #0b0c10;
+      font-weight: 700;
+    }
+
+    .gf-size input:focus-visible + span { outline: 2px solid #ffd27a; outline-offset: 2px; }
+
+    .gf-qty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      direction: ltr;
+      width: clamp(120px, 24cqw, 160px);
+      height: clamp(34px, 6.6cqw, 44px);
+      margin-inline: auto;
+      overflow: hidden;
+      border: 1px solid rgba(198, 204, 212, .5);
+      border-radius: 1.2cqw;
+    }
+
+    .gf-qty:focus-within { border-color: rgba(255, 255, 255, .85); }
+
+    .gf-qty-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 33%;
+      height: 100%;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-size: clamp(15px, 3.4cqw, 20px);
+      line-height: 1;
+      transition: background .16s ease;
+    }
+
+    .gf-qty-btn:hover { background: rgba(255, 255, 255, .08); }
+
+    .gf-qty-input {
+      width: 34%;
+      height: 100%;
+      padding: 0;
+      border: 0;
+      border-inline: 1px solid rgba(198, 204, 212, .35);
+      background: transparent;
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: clamp(13px, 3.2cqw, 18px);
+      font-weight: 600;
+      text-align: center;
+      outline: none;
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+
+    .gf-qty-input::-webkit-outer-spin-button,
+    .gf-qty-input::-webkit-inner-spin-button { margin: 0; -webkit-appearance: none; }
+
+    /* price ticket ------------------------------------------------------- */
+    .gf-ticket {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 2cqw;
+      margin-top: 7cqw;
+      padding: 5.2cqw 4.6cqw 5.4cqw;
+      background: url('Form/assets/price-ticket.webp') center / 100% 100% no-repeat;
+      color: #101114;
+    }
+
+    .gf-ticket-col {
+      display: flex;
+      flex: 1 1 0;
+      flex-direction: column;
+      align-items: center;
+      gap: .6cqw;
+    }
+
+    .gf-ticket-col--old { gap: 1.1cqw; }
+
+    .gf-ticket-label {
+      color: #2a2b2f;
+      font-size: clamp(10px, 2.6cqw, 15px);
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .gf-ticket-now {
+      display: flex;
+      align-items: baseline;
+      gap: .8cqw;
+      color: #0c0d10;
+      font-family: var(--font-headline);
+      font-size: clamp(21px, 7.2cqw, 40px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -.02em;
+    }
+
+    .gf-ticket-old {
+      position: relative;
+      display: flex;
+      align-items: baseline;
+      gap: .6cqw;
+      color: #1b1c20;
+      font-family: var(--font-headline);
+      font-size: clamp(14px, 4.6cqw, 26px);
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -.02em;
+    }
+
+    .gf-ticket-old::after {
+      position: absolute;
+      top: 54%;
+      left: -1%;
+      width: 102%;
+      height: clamp(2px, .5cqw, 4px);
+      border-radius: 3px;
+      background: linear-gradient(90deg, rgba(240, 150, 72, 0) 0%, #f09648 6%, #eab072 94%, rgba(240, 150, 72, 0) 100%);
+      content: "";
+      transform: rotate(-3.5deg);
+    }
+
+    .gf-cur { font-size: .56em; font-weight: 600; letter-spacing: 0; }
+
+    .gf-ticket-save {
+      padding: .55cqw 2.8cqw;
+      background-color: #ffb366;
+      clip-path: polygon(5% 0%, 100% 5%, 95% 100%, 0% 95%);
+      color: #141414;
+      font-size: clamp(9.5px, 2.5cqw, 14px);
+      font-weight: 700;
+      line-height: 1.65;
+      white-space: nowrap;
+      transform: rotate(-3deg);
+    }
+
+    /* cta + footer ------------------------------------------------------- */
+    /* the cut-out paper plaque is the background image, label + icon sit on top */
+    .image-backed-cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 89%;
+      max-width: 400px;
+      aspect-ratio: 5.3 / 1;
+      min-height: 50px;
+      margin: 4.2cqw auto 0;
+      padding: 0 10px;
+      border: none;
+      outline: none;
+      background-color: transparent;
+      background-image: url('Form/assets/button-texture.webp');
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      color: #111111;
+      cursor: pointer;
+      font-family: var(--font-headline);
+      font-size: clamp(17px, 5.4cqw, 25px);
+      font-weight: 900;
+      line-height: 1;
+      filter: brightness(1.1) contrast(.97);
+      transition: transform .2s ease;
+    }
+
+    .image-backed-cta:active { transform: scale(.97); }
+
+    .image-backed-cta .gf-icon {
+      flex: 0 0 auto;
+      width: clamp(20px, 6cqw, 28px);
+      height: clamp(20px, 6cqw, 28px);
+      color: #111111;
+      opacity: 1;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .trust-badges-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-top: 14px;
+      padding: 0;
+      gap: 6px;
+    }
+
+    .badge-item { display: flex; align-items: center; gap: 5px; min-width: 0; }
+
+    .badge-item span {
+      color: #dddddd;
+      font-size: 10.5px;
+      font-weight: 400;
+      line-height: 1.3;
+    }
+
+    .badge-item svg {
+      flex: 0 0 auto;
+      width: 13px;
+      height: 13px;
+      fill: none;
+      stroke: #dddddd;
+      stroke-width: 1.5;
+      opacity: 1;
+    }
+
+    @media (max-width: 430px) {
+      .trust-badges-container { gap: 4px; }
+      .badge-item { gap: 4px; }
+      .badge-item span { font-size: 9px; }
+      .badge-item svg { width: 11px; height: 11px; }
+    }
+
+    #order-status {
+      min-height: 0;
+      margin: 3cqw 0 0;
+      color: #ffd27a;
+      font-size: clamp(11px, 2.7cqw, 15px);
+      font-weight: 600;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    #order-status:empty { display: none; }
+
+    /* ---------- Color switcher (final scene) ---------- */
+    .color-section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent; /* the ::before cover is the only opaque layer */
+    }
+
+    /* opaque backdrop that covers the video canvas behind the final scene.
+       It only exists while the scene is on screen, so scrolling back exposes
+       the video again immediately. */
+    .color-section::before {
+      position: absolute;
+      z-index: 15;
+      inset: 0;
+      background: #06070a;
+      content: "";
+      opacity: 0;
+      transition: opacity .18s ease;
+    }
+
+    .color-section.is-active::before { opacity: 1; }
+
+    .shoe-color-preview-section {
+      position: relative;
+      z-index: 25; /* above #frame-container (10) and #gradient-overlay (20) */
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden; /* stops the big frames from being composited off-scene */
+      transition: opacity .2s ease, visibility 0s linear .2s;
+    }
+
+    .shoe-color-preview-section.is-visible {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity .3s ease;
+    }
+
+    /* the collage fills the whole scene, edge to edge */
+    .shoes-image-stack {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .shoe-variant-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      /* exactly the canvas magnification (#frame-container.is-final-scene = 1.02)
+         so nothing shifts when the scene hands back to the video */
+      transform: scale(1.02);
+      transform-origin: center center;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .45s ease, visibility 0s linear .45s;
+    }
+
+    .shoe-variant-img.active {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity .45s ease;
+    }
+
+    /* swatches + order button share one bottom panel */
+    .color-ui-panel {
+      position: absolute;
+      bottom: calc(5svh + env(safe-area-inset-bottom, 0px));
+      left: 50%;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(10px, 3vw, 16px);
+      width: 90%;
+      max-width: 400px;
+      transform: translateX(-50%);
+    }
+
+    .color-selectors-container {
+      display: flex;
+      gap: clamp(10px, 3.2vw, 18px);
+    }
+
+    /* order button: same paper plaque as the checkout form's submit button */
+    .color-section-cta {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 50px;
+      aspect-ratio: 5.3 / 1;
+      padding: 0 10px;
+      border: none;
+      outline: none;
+      background-color: transparent;
+      background-image: url('Form/assets/button-texture.webp');
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      color: #111111;
+      cursor: pointer;
+      font-family: var(--font-headline);
+      font-size: clamp(16px, 4.6vw, 20px);
+      font-weight: 900;
+      line-height: 1;
+      filter: brightness(1.1) contrast(.97);
+      opacity: 0;
+      transform: translateY(35px);
+      transition: opacity .6s cubic-bezier(.16, 1, .3, 1) .45s, transform .6s cubic-bezier(.16, 1, .3, 1) .45s;
+    }
+
+    .color-ui-panel.is-visible .color-section-cta {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .color-section-cta:active { transform: translateY(1px) scale(.97); }
+
+    .color-section-cta-icon { flex: 0 0 auto; width: clamp(19px, 5.4vw, 25px); height: auto; }
+
+    /* leaving with the scene: same fast exit as the cards */
+    .color-ui-panel:not(.is-visible) .color-section-cta {
+      transition: opacity .18s ease, transform .26s ease;
+    }
+
+    /* wrapper carries the slide-up entrance so the button keeps its own transform */
+    .polaroid-slot {
+      display: block;
+      opacity: 0;
+      transform: translateY(150%) scale(.92);
+      transition: transform .62s cubic-bezier(.22, 1, .36, 1), opacity .4s ease;
+    }
+
+    .color-selectors-container.is-visible .polaroid-slot {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .color-selectors-container.is-visible .polaroid-slot:nth-child(1) { transition-delay: .06s, .06s; }
+    .color-selectors-container.is-visible .polaroid-slot:nth-child(2) { transition-delay: .2s, .2s; }
+    .color-selectors-container.is-visible .polaroid-slot:nth-child(3) { transition-delay: .34s, .34s; }
+
+    /* leaving: no stagger, straight down and gone */
+    .color-selectors-container:not(.is-visible) .polaroid-slot {
+      transition: transform .26s cubic-bezier(.55, 0, .9, .4), opacity .18s ease;
+    }
+
+    .polaroid-selector {
+      position: relative;
+      display: block;
+      width: clamp(80px, 22vw, 108px);
+      height: clamp(98px, 27vw, 132px);
+      padding: 9px 9px 20px;
+      border: none;
+      background-color: #fff;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, .4);
+      cursor: pointer;
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+
+    /* dimmed overlay instead of a css filter (cheaper to composite) */
+    .polaroid-selector::after {
+      position: absolute;
+      inset: 0;
+      background: rgba(6, 7, 10, .58);
+      content: "";
+      opacity: 1;
+      pointer-events: none;
+      transition: opacity .25s ease;
+    }
+
+    .tape-effect {
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      width: 30px;
+      height: 12px;
+      border-radius: 2px;
+      background-color: rgba(40, 40, 40, .7);
+      transform: translateX(-50%);
+    }
+
+    .color-box {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 2px;
+    }
+
+    /* sampled from Color section/assets/*.webp (shoe body, highlights excluded) */
+    .black-box { background-color: #2D232E; }
+    .grey-box { background-color: #7B737A; }
+    .blue-box { background-color: #2D3556; }
+
+    .polaroid-selector.active {
+      z-index: 2;
+      transform: translateY(-12px) scale(1.12);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, .65), 0 0 0 3px #FF7A00;
+    }
+
+    .polaroid-selector.active::after { opacity: 0; }
+
+    .polaroid-selector:focus-visible {
+      outline: 3px solid #fff;
+      outline-offset: 3px;
+    }
+
+    /* ---------- FAQ modal ---------- */
+    #faq-dialog {
+      width: min(100% - 24px, 520px);
+      max-width: 520px;
+      max-height: 92svh;
+      padding: 0;
+      overflow: hidden;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: #fff;
+    }
+
+    #faq-dialog::backdrop {
+      background: rgba(4, 5, 8, .72);
+      backdrop-filter: blur(7px) saturate(1.1);
+      -webkit-backdrop-filter: blur(7px) saturate(1.1);
+    }
+
+    .faq-shell {
+      position: relative;
+      display: flex;
+      max-height: 92svh;
+    }
+
+    .faq-scroll {
+      width: 100%;
+      max-height: 92svh;
+      padding: 12px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 177, 77, .5) transparent;
+    }
+
+    .faq-panel {
+      container-type: inline-size;
+      position: relative;
+      overflow: hidden;
+      padding: 9cqw 6.2cqw 7cqw;
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 26px;
+      background:
+        radial-gradient(92% 62% at 50% -14%, rgba(255, 177, 77, .3), rgba(255, 177, 77, 0) 66%),
+        radial-gradient(70% 46% at 104% 108%, rgba(255, 122, 0, .12), rgba(255, 122, 0, 0) 72%),
+        linear-gradient(168deg, #1b1d24 0%, #0d0e12 58%, #08090c 100%);
+      box-shadow:
+        0 30px 80px rgba(0, 0, 0, .72),
+        0 0 0 1px rgba(255, 177, 77, .1),
+        inset 0 1px 0 rgba(255, 255, 255, .1);
+      -webkit-backdrop-filter: blur(18px) saturate(1.15);
+      backdrop-filter: blur(18px) saturate(1.15);
+    }
+
+    /* golden hairline across the top + soft vignette at the bottom */
+    .faq-panel::before {
+      position: absolute;
+      z-index: 2;
+      inset: 0 0 auto;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 196, 107, .8), transparent);
+      content: "";
+      pointer-events: none;
+    }
+
+    .faq-panel::after {
+      position: absolute;
+      z-index: 0;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(120% 82% at 50% 0%, transparent 46%, rgba(0, 0, 0, .38) 100%);
+      content: "";
+      pointer-events: none;
+    }
+
+    .faq-head, .faq-list { position: relative; z-index: 1; }
+
+    .faq-close {
+      position: absolute;
+      z-index: 3;
+      top: 14px;
+      left: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .06);
+      color: #fff;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      transition: background .2s ease, border-color .2s ease, transform .2s ease;
+    }
+
+    .faq-close:hover {
+      border-color: rgba(255, 177, 77, .45);
+      background: rgba(255, 177, 77, .16);
+      transform: scale(1.06);
+    }
+
+    .faq-head {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2.6cqw;
+      margin-bottom: 6.4cqw;
+      text-align: center;
+    }
+
+    .faq-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: clamp(44px, 15cqw, 62px);
+      height: clamp(44px, 15cqw, 62px);
+      border-radius: 50%;
+      background: linear-gradient(160deg, #ffd08a 0%, #ff9a2e 55%, #ff7a00 100%);
+      box-shadow:
+        0 14px 32px rgba(255, 138, 31, .42),
+        0 0 0 7px rgba(255, 177, 77, .08),
+        0 0 0 1px rgba(255, 214, 160, .35),
+        inset 0 2px 0 rgba(255, 255, 255, .55);
+      color: #2a1400;
+      font-family: 'Titan One', var(--font-headline), sans-serif;
+      font-size: clamp(22px, 7.4cqw, 30px);
+      line-height: 1;
+      padding-bottom: .1em;
+    }
+
+    .faq-title {
+      margin: 0;
+      background: linear-gradient(180deg, #ffe0b0 0%, #ffc46b 52%, #ff9a2e 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: #ffc46b;
+      -webkit-text-fill-color: transparent;
+      font-family: var(--font-headline);
+      font-size: clamp(19px, 6cqw, 34px);
+      font-weight: 700;
+      line-height: 1.25;
+      letter-spacing: -.01em;
+    }
+
+    .faq-sub {
+      margin: 0;
+      color: #9aa3ae;
+      font-size: clamp(11px, 3cqw, 16px);
+      line-height: 1.6;
+    }
+
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3.2cqw;
+      margin: 0;
+      padding: 0 0 1.5cqw;
+      list-style: none;
+    }
+
+    .faq-item {
+      position: relative;
+      overflow: hidden;
+      padding: 3.9cqw 4.4cqw 3.6cqw;
+      border: 1px solid rgba(255, 255, 255, .075);
+      border-radius: 16px;
+      background: linear-gradient(158deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .022));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
+      transition: border-color .24s ease, background .24s ease, transform .24s ease, box-shadow .24s ease;
+    }
+
+    /* accent bar on the leading edge of every card */
+    .faq-item::before {
+      position: absolute;
+      inset-block: 16%;
+      inset-inline-start: 0;
+      width: 3px;
+      border-radius: 3px;
+      background: linear-gradient(180deg, #ffd08a, #ff7a00);
+      opacity: .55;
+      content: "";
+      transition: opacity .24s ease;
+    }
+
+    .faq-item:hover {
+      border-color: rgba(255, 177, 77, .36);
+      background: linear-gradient(158deg, rgba(255, 177, 77, .1), rgba(255, 177, 77, .03));
+      transform: translateY(-1px);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 10px 24px rgba(0, 0, 0, .3);
+    }
+
+    .faq-item:hover::before { opacity: 1; }
+
+    .faq-q {
+      display: flex;
+      align-items: flex-start;
+      gap: 2cqw;
+      margin: 0 0 1.6cqw;
+      color: #fff;
+      font-family: var(--font-headline);
+      font-size: clamp(13px, 3.5cqw, 19px);
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    .faq-q::before {
+      display: flex;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: center;
+      width: 1.7em;
+      height: 1.7em;
+      margin-top: .06em;
+      border: 1px solid rgba(255, 177, 77, .3);
+      border-radius: 10px;
+      background: radial-gradient(circle at 50% 0%, rgba(255, 196, 107, .28), rgba(255, 177, 77, .08));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12);
+      color: #ffc46b;
+      content: "?";
+      font-family: 'Titan One', var(--font-headline), sans-serif;
+      font-size: .96em;
+      font-weight: 400;
+      line-height: 1;
+      padding-bottom: .12em;
+    }
+
+    .faq-a {
+      margin: 0;
+      padding-inline-start: 2.7em;
+      color: #b9c0ca;
+      font-size: clamp(12px, 3.1cqw, 16px);
+      font-weight: 400;
+      line-height: 1.85;
+    }
+
+    .faq-a .good { color: #4dff4d; font-weight: 700; }
 
     @media (max-width: 380px) {
       .section-copy { padding-right: 18px; padding-left: 18px; }
-      .order-grid { grid-template-columns:1fr; }
-      .field.full { grid-column:auto; }
+      .close-dialog { top: 8px; left: 8px; width: 30px; height: 30px; font-size: 17px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -542,8 +1631,9 @@
   <main id="story" dir="rtl" aria-label="مميزات حذاء الأمان">
     <section class="section hero" aria-labelledby="hero-title">
       <picture>
-        <source srcset="Main%20video/hero-1080-edc27943d1ea.avif" type="image/avif">
-        <img src="Main%20video/hero-ced6660f6433.webp" alt="حذاء أمان رياضي باللونين الأسود والرمادي" decoding="async" fetchpriority="high">
+        <source media="(max-width: 700px)" srcset="Main%20video/hero-1080.webp" type="image/webp">
+        <source srcset="Main%20video/hero-1440.webp" type="image/webp">
+        <img src="Main%20video/hero-1440.webp" alt="حذاء أمان رياضي باللونين الأسود والرمادي" decoding="async" fetchpriority="high">
       </picture>
       <div class="section-copy ui-container ui-visible hero-copy">
         <span class="trust-badge">حذاء أمان OBIDER</span>
@@ -586,7 +1676,48 @@
     <section class="section video-section technical-section" aria-label="العرض النهائي" data-video="10" data-duration="2.53" data-forward="transition-10-forward.mp4" data-reverse="transition-10-reverse.mp4" data-anchor="section-10-anchor.webp">
       <template class="section-copy-template"><span class="feature-tag">العرض النهائي</span><h2>كل ما تحتاجه في <span class="highlight">حذاء واحد</span>.</h2><p class="copy-body">الحماية، الراحة، الخفة، والسرعة. احمِ نفسك في موقع العمل الآن.</p></template>
     </section>
-    <section class="section video-section silent-section" aria-label="المشهد الختامي" data-index="11" data-title="" data-body="" data-cta="false" data-video="11" data-duration="3.22" data-forward="transition-11-forward.mp4" data-reverse="transition-11-reverse.mp4" data-anchor="section-11-anchor.webp"></section>
+    <section class="section video-section silent-section color-section" aria-label="اختر لون حذائك" data-index="11" data-title="" data-body="" data-cta="false" data-video="11" data-duration="3.22" data-forward="transition-11-forward.mp4" data-reverse="transition-11-reverse.mp4" data-anchor="section-11-anchor.webp">
+      <div class="shoe-color-preview-section">
+        <div class="shoes-image-stack">
+          <img class="shoe-variant-img" data-color="blue" src="Color%20section/assets/blue.webp" alt="حذاء أمان أزرق" decoding="async" loading="lazy">
+          <img class="shoe-variant-img active" data-color="grey" src="Color%20section/assets/grey.webp" alt="حذاء أمان رمادي" decoding="async" loading="lazy">
+          <img class="shoe-variant-img" data-color="black" src="Color%20section/assets/black.webp" alt="حذاء أمان أسود" decoding="async" loading="lazy">
+
+          <div class="color-ui-panel">
+            <div class="color-selectors-container" role="group" aria-label="اختر لون الحذاء">
+            <span class="polaroid-slot">
+              <button class="polaroid-selector" type="button" data-target-color="blue" aria-label="اختر اللون الأزرق" aria-pressed="false">
+                <span class="tape-effect" aria-hidden="true"></span>
+                <span class="color-box blue-box"></span>
+              </button>
+            </span>
+            <span class="polaroid-slot">
+              <button class="polaroid-selector active" type="button" data-target-color="grey" aria-label="اختر اللون الرمادي" aria-pressed="true">
+                <span class="tape-effect" aria-hidden="true"></span>
+                <span class="color-box grey-box"></span>
+              </button>
+            </span>
+            <span class="polaroid-slot">
+              <button class="polaroid-selector" type="button" data-target-color="black" aria-label="اختر اللون الأسود" aria-pressed="false">
+                <span class="tape-effect" aria-hidden="true"></span>
+                <span class="color-box black-box"></span>
+              </button>
+            </span>
+            </div>
+
+            <button class="color-section-cta" id="color-buy-now-btn" type="button">
+              <span>إتمام الطلب</span>
+              <svg class="color-section-cta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
   </main>
 
   <div id="frame-container" aria-hidden="true"><canvas id="frame-canvas"></canvas></div>
@@ -594,33 +1725,205 @@
   <div id="gradient-overlay" aria-hidden="true"></div>
   <div class="fixed-ui-layer" aria-label="واجهة الشراء">
     <div id="dynamic-text-container" class="text-stages" aria-live="polite" aria-atomic="true" aria-hidden="true"></div>
-    <button id="sticky-cta" class="sticky-floating-pill hidden-in-hero" type="button" aria-hidden="true" tabindex="-1" onclick="scrollToOrderForm()">اطلب الآن - الدفع عند الاستلام</button>
+    <button id="sticky-cta" class="liquid-glass-element liquid-cta hidden-in-hero" type="button" aria-hidden="true" tabindex="-1" onclick="scrollToOrderForm()">اطلب الآن - الدفع عند الاستلام</button>
+    <button id="faq-fab" class="liquid-glass-element liquid-faq hidden-in-hero" type="button" aria-label="الأسئلة الشائعة" aria-hidden="true" tabindex="-1" onclick="openFaq()">?</button>
   </div>
 
   <dialog id="order-dialog" aria-labelledby="order-title">
-    <div class="order-scroll">
-      <div class="order-heading">
-        <div><h2 id="order-title">أكمل طلبك</h2><p>أدخل بياناتك لاختيار تفاصيل الحذاء.</p></div>
-        <button class="close-dialog" type="button" aria-label="إغلاق" onclick="closeOrderForm()">×</button>
-      </div>
-      <form id="order-form">
-        <div class="order-grid">
-          <div class="field full"><label for="customer-name">الاسم الكامل</label><input id="customer-name" name="name" autocomplete="name" placeholder="اكتب اسمك الكامل" required></div>
-          <div class="field"><label for="customer-phone">رقم الهاتف</label><input id="customer-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05 / 06 / 07..." required></div>
-          <div class="field"><label for="customer-wilaya">الولاية</label><input id="customer-wilaya" name="wilaya" autocomplete="address-level1" placeholder="اكتب ولايتك" required></div>
-          <div class="field full"><label for="customer-city">البلدية</label><input id="customer-city" name="city" autocomplete="address-level2" placeholder="اكتب بلديتك" required></div>
-          <div class="field full"><span class="field-label">اللون</span><div class="color-options" role="radiogroup" aria-label="اختر اللون">
-            <label class="color-option"><input type="radio" name="color" value="رمادي" required> رمادي</label>
-            <label class="color-option"><input type="radio" name="color" value="أسود"> أسود</label>
-            <label class="color-option"><input type="radio" name="color" value="أبيض"> أبيض</label>
-          </div></div>
-          <div class="field"><label for="shoe-size">المقاس</label><select id="shoe-size" name="size" required><option value="">اختر المقاس</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option></select></div>
-          <div class="field"><label for="quantity">الكمية</label><input id="quantity" name="quantity" type="number" min="1" max="10" value="1" required></div>
+    <div class="order-shell">
+      <button class="close-dialog" type="button" aria-label="إغلاق" onclick="closeOrderForm()">×</button>
+      <div class="order-scroll">
+        <div class="grunge-card">
+          <svg class="gf-sprite" aria-hidden="true" focusable="false" width="0" height="0">
+            <defs>
+              <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.7"/><path d="M5 20.2c.6-3.7 3.4-5.7 7-5.7s6.4 2 7 5.7"/></symbol>
+              <symbol id="i-phone" viewBox="0 0 24 24"><path d="M7.2 3.4h2.3l1.6 4-2 1.4a12.4 12.4 0 0 0 6.1 6.1l1.4-2 4 1.6v2.3a3 3 0 0 1-3.3 3A16.6 16.6 0 0 1 3.9 6.7a3 3 0 0 1 3.3-3.3Z"/></symbol>
+              <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21.2s6.6-6.1 6.6-10.7a6.6 6.6 0 1 0-13.2 0C5.4 15.1 12 21.2 12 21.2Z"/><circle cx="12" cy="10.2" r="2.4"/></symbol>
+              <symbol id="i-building" viewBox="0 0 24 24"><path d="M5.2 21V6.6L12 3.2l6.8 3.4V21"/><path d="M3.2 21h17.6"/><path d="M9.4 21v-4.2h5.2V21"/><path d="M8.9 9.2h.01M12 9.2h.01M15.1 9.2h.01M8.9 12.6h.01M12 12.6h.01M15.1 12.6h.01"/></symbol>
+              <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3.2a8.8 8.8 0 1 0 0 17.6c1.5 0 2.1-1 2.1-1.9 0-1.5-1.4-1.7-1.4-3 0-1 .8-1.7 1.9-1.7h1.5a4.9 4.9 0 0 0 4.9-5c0-3.5-4-6-9-6Z"/><circle cx="7.7" cy="10.2" r=".9"/><circle cx="10.1" cy="6.9" r=".9"/><circle cx="14.4" cy="6.9" r=".9"/></symbol>
+              <symbol id="i-ruler" viewBox="0 0 24 24"><rect x="2.6" y="8" width="18.8" height="8" rx="1.8"/><path d="M7.2 8v3.1M11 8v4.4M14.8 8v3.1M18.6 8v4.4"/></symbol>
+              <symbol id="i-box" viewBox="0 0 24 24"><path d="M12 2.8 20 7v10l-8 4.2L4 17V7l8-4.2Z"/><path d="M4 7l8 4.2L20 7"/><path d="M12 11.2V21"/></symbol>
+              <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M6 9.2 12 15l6-5.8"/></symbol>
+              <symbol id="i-plane" viewBox="0 0 24 24"><path d="M21 3 3 10.4l7.1 2.7 2.7 7.2L21 3Z"/><path d="M21 3 10 13.2"/></symbol>
+              <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 6v5.9c0 4.2 2.9 7.7 7 9.1 4.1-1.4 7-4.9 7-9.1V6l-7-3Z"/><path d="m9 12 2.1 2.1L15.2 10"/></symbol>
+              <symbol id="i-truck" viewBox="0 0 24 24"><path d="M2.6 6.6h9.6v9.2H2.6z"/><path d="M12.2 9.6h4.4l3 3.3v2.9h-7.4z"/><circle cx="6.5" cy="17.6" r="1.7"/><circle cx="16.4" cy="17.6" r="1.7"/></symbol>
+              <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.8" y="10.4" width="14.4" height="10.2" rx="2.2"/><path d="M8.4 10.4V8a3.6 3.6 0 1 1 7.2 0v2.4"/></symbol>
+            </defs>
+          </svg>
+
+          <h2 id="order-title" class="sr-only">طلب الآن</h2>
+
+          <form id="order-form" novalidate>
+            <header class="gf-head">
+              <img class="gf-title" src="Form/assets/order-title.webp" alt="طلب الآن" width="492" height="269" decoding="async">
+              <p class="gf-sub">أملأ المعلومات التالية لإتمام طلبك</p>
+            </header>
+
+            <div class="gf-fields">
+              <label class="gf-field">
+                <span class="gf-body">
+                  <span class="gf-label">الاسم الكامل<span class="req" aria-hidden="true">*</span></span>
+                  <input class="gf-input" id="customer-name" name="name" type="text" autocomplete="name" placeholder="مثال: أحمد بن محمد" required>
+                </span>
+                <svg class="gf-icon" aria-hidden="true"><use href="#i-user"/></svg>
+              </label>
+
+              <label class="gf-field">
+                <span class="gf-body">
+                  <span class="gf-label">رقم الهاتف<span class="req" aria-hidden="true">*</span></span>
+                  <input class="gf-input" id="customer-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="مثال: 05 18 34 56 76" pattern="0[5-7][0-9\s]{8,12}" required>
+                </span>
+                <svg class="gf-icon" aria-hidden="true"><use href="#i-phone"/></svg>
+              </label>
+
+              <label class="gf-field">
+                <span class="gf-body">
+                  <span class="gf-label">الولاية<span class="req" aria-hidden="true">*</span></span>
+                  <select class="gf-input gf-select" id="customer-wilaya" name="wilaya" autocomplete="address-level1" required>
+                    <option value="" selected>أختر ولايتك</option>
+                    <option>01 - أدرار</option><option>02 - الشلف</option><option>03 - الأغواط</option><option>04 - أم البواقي</option><option>05 - باتنة</option><option>06 - بجاية</option><option>07 - بسكرة</option><option>08 - بشار</option><option>09 - البليدة</option><option>10 - البويرة</option><option>11 - تمنراست</option><option>12 - تبسة</option><option>13 - تلمسان</option><option>14 - تيارت</option><option>15 - تيزي وزو</option><option>16 - الجزائر</option><option>17 - الجلفة</option><option>18 - جيجل</option><option>19 - سطيف</option><option>20 - سعيدة</option><option>21 - سكيكدة</option><option>22 - سيدي بلعباس</option><option>23 - عنابة</option><option>24 - قالمة</option><option>25 - قسنطينة</option><option>26 - المدية</option><option>27 - مستغانم</option><option>28 - المسيلة</option><option>29 - معسكر</option><option>30 - ورقلة</option><option>31 - وهران</option><option>32 - البيض</option><option>33 - إليزي</option><option>34 - برج بوعريريج</option><option>35 - بومرداس</option><option>36 - الطارف</option><option>37 - تندوف</option><option>38 - تيسمسيلت</option><option>39 - الوادي</option><option>40 - خنشلة</option><option>41 - سوق أهراس</option><option>42 - تيبازة</option><option>43 - ميلة</option><option>44 - عين الدفلى</option><option>45 - النعامة</option><option>46 - عين تموشنت</option><option>47 - غرداية</option><option>48 - غليزان</option><option>49 - تيميمون</option><option>50 - برج باجي مختار</option><option>51 - أولاد جلال</option><option>52 - بني عباس</option><option>53 - عين صالح</option><option>54 - عين قزام</option><option>55 - تقرت</option><option>56 - جانت</option><option>57 - المغير</option><option>58 - المنيعة</option>
+                  </select>
+                </span>
+                <svg class="gf-icon" aria-hidden="true"><use href="#i-pin"/></svg>
+                <svg class="gf-icon gf-chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+              </label>
+
+              <label class="gf-field">
+                <span class="gf-body">
+                  <span class="gf-label">البلدية</span>
+                  <input class="gf-input" id="customer-city" name="city" type="text" autocomplete="address-level2" placeholder="مثال: اسم البلدية الخاصة بك">
+                </span>
+                <svg class="gf-icon" aria-hidden="true"><use href="#i-building"/></svg>
+              </label>
+            </div>
+
+            <div class="gf-group" role="radiogroup" aria-label="اللون">
+              <div class="gf-legend" aria-hidden="true">
+                <svg class="gf-icon"><use href="#i-palette"/></svg>
+                <span class="gf-legend-text">اللون</span>
+                <span class="req">*</span>
+              </div>
+              <div class="gf-swatches">
+                <label class="gf-swatch" title="أزرق">
+                  <input type="radio" name="color" value="أزرق" required>
+                  <span class="gf-dot" style="--dot:#2D3556"></span>
+                  <span class="sr-only">أزرق</span>
+                </label>
+                <label class="gf-swatch" title="رمادي">
+                  <input type="radio" name="color" value="رمادي">
+                  <span class="gf-dot" style="--dot:#7B737A"></span>
+                  <span class="sr-only">رمادي</span>
+                </label>
+                <label class="gf-swatch" title="أسود">
+                  <input type="radio" name="color" value="أسود">
+                  <span class="gf-dot" style="--dot:#2D232E"></span>
+                  <span class="sr-only">أسود</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="gf-group" role="radiogroup" aria-label="المقاس">
+              <div class="gf-legend" aria-hidden="true">
+                <svg class="gf-icon"><use href="#i-ruler"/></svg>
+                <span class="gf-legend-text">المقاس</span>
+                <span class="req">*</span>
+              </div>
+              <div class="gf-sizes">
+                <label class="gf-size"><input type="radio" name="size" value="40" required><span>40</span></label>
+                <label class="gf-size"><input type="radio" name="size" value="41"><span>41</span></label>
+                <label class="gf-size"><input type="radio" name="size" value="42"><span>42</span></label>
+                <label class="gf-size"><input type="radio" name="size" value="43"><span>43</span></label>
+                <label class="gf-size"><input type="radio" name="size" value="44"><span>44</span></label>
+                <label class="gf-size"><input type="radio" name="size" value="45"><span>45</span></label>
+              </div>
+            </div>
+
+            <div class="gf-group" role="group" aria-labelledby="gf-qty-legend">
+              <div class="gf-legend" id="gf-qty-legend">
+                <svg class="gf-icon" aria-hidden="true"><use href="#i-box"/></svg>
+                <span class="gf-legend-text">الكمية</span>
+                <span class="req" aria-hidden="true">*</span>
+              </div>
+              <div class="gf-qty">
+                <button class="gf-qty-btn" type="button" data-step="-1" aria-label="تقليل الكمية">−</button>
+                <input class="gf-qty-input" id="quantity" name="quantity" type="number" inputmode="numeric" min="1" max="10" step="1" value="1" aria-label="الكمية" required>
+                <button class="gf-qty-btn" type="button" data-step="1" aria-label="زيادة الكمية">+</button>
+              </div>
+            </div>
+
+            <div class="gf-ticket" dir="rtl">
+              <div class="gf-ticket-col gf-ticket-col--old">
+                <span class="gf-ticket-label">السعر الأصلي</span>
+                <span class="gf-ticket-old"><b data-price-old>4,800</b><span class="gf-cur">دج</span></span>
+                <span class="gf-ticket-save">وفر <b data-price-save>1,900</b> دج</span>
+              </div>
+              <div class="gf-ticket-col gf-ticket-col--now">
+                <span class="gf-ticket-label">السعر بعد التخفيض</span>
+                <span class="gf-ticket-now"><b data-price-now>2,900</b><span class="gf-cur">دج</span></span>
+              </div>
+            </div>
+
+            <button class="image-backed-cta" type="submit">
+              <span>إتمام الطلب</span>
+              <svg class="gf-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+
+            <div class="trust-badges-container">
+              <div class="badge-item">
+                <svg class="gf-icon" aria-hidden="true"><use href="#i-shield"/></svg>
+                <span>الدفع عند الاستلام</span>
+              </div>
+              <div class="badge-item">
+                <svg class="gf-icon" aria-hidden="true"><use href="#i-truck"/></svg>
+                <span>توصيل لجميع الولايات</span>
+              </div>
+              <div class="badge-item">
+                <svg class="gf-icon" aria-hidden="true"><use href="#i-lock"/></svg>
+                <span>معلوماتك آمنة</span>
+              </div>
+            </div>
+
+            <p id="order-status" role="status" aria-live="polite"></p>
+          </form>
         </div>
-        <p class="order-note">الدفع عند الاستلام. لم يتم ربط هذا النموذج بخدمة استقبال الطلبات بعد.</p>
-        <button class="btn-form-submit" type="submit">إتمام الطلب</button>
-        <p id="order-status" role="status" aria-live="polite"></p>
-      </form>
+      </div>
+    </div>
+  </dialog>
+  <dialog id="faq-dialog" aria-labelledby="faq-title">
+    <div class="faq-shell">
+      <div class="faq-scroll">
+        <div class="faq-panel">
+          <button class="faq-close" type="button" aria-label="إغلاق" onclick="closeFaq()">×</button>
+
+          <header class="faq-head">
+            <span class="faq-badge" aria-hidden="true">?</span>
+            <h2 class="faq-title" id="faq-title">الأسئلة الشائعة</h2>
+            <p class="faq-sub">كل ما تحتاج معرفته قبل إتمام طلبك</p>
+          </header>
+
+          <ul class="faq-list">
+            <li class="faq-item">
+              <h3 class="faq-q">هل الحذاء ثقيل أثناء المشي؟</h3>
+              <p class="faq-a">لا، بفضل طبقة الكيفلار والمواد الحديثة، الحذاء خفيف جداً ومريح طوال اليوم ولن يسبب لك آلام الظهر.</p>
+            </li>
+            <li class="faq-item">
+              <h3 class="faq-q">كيف أختار المقاس المناسب؟</h3>
+              <p class="faq-a">المقاسات مضبوطة بدقة ومعايير عالمية. فقط اختر مقاسك الرياضي الذي تلبسه في العادة.</p>
+            </li>
+            <li class="faq-item">
+              <h3 class="faq-q">هل يمكنني الدفع عند الاستلام؟</h3>
+              <p class="faq-a">نعم، الدفع يكون <span class="good">يداً بيد</span> بعد استلام وتفقد الحذاء بنفسك.</p>
+            </li>
+            <li class="faq-item">
+              <h3 class="faq-q">متى يصلني الطلب؟</h3>
+              <p class="faq-a">التوصيل سريع جداً لجميع الولايات (58 ولاية) ويستغرق من 2 إلى 4 أيام عمل كأقصى حد.</p>
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
   </dialog>
 
@@ -638,6 +1941,8 @@
     const heroCtaContainer = document.querySelector('.hero-cta-container');
     const dynamicTextContainer = document.querySelector('#dynamic-text-container');
     const stickyCta = document.querySelector('#sticky-cta');
+    const faqFab = document.querySelector('#faq-fab');
+    const faqDialog = document.querySelector('#faq-dialog');
     const orderDialog = document.querySelector('#order-dialog');
     let currentSection = 0;
     let activeVideo = null;
@@ -717,7 +2022,7 @@
     }
 
     function renderHeroParticles(now) {
-      if (currentSection !== 0 || isScrollingLocked || orderDialog.open || !particleContext) {
+      if (currentSection !== 0 || isScrollingLocked || (orderDialog.open || faqDialog.open) || !particleContext) {
         stopHeroParticles();
         return;
       }
@@ -748,7 +2053,7 @@
     }
 
     function startHeroParticles() {
-      if (currentSection !== 0 || isScrollingLocked || orderDialog.open || !particleContext) return;
+      if (currentSection !== 0 || isScrollingLocked || (orderDialog.open || faqDialog.open) || !particleContext) return;
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       if (particleAnimationFrame) return;
       seedHeroParticles();
@@ -892,6 +2197,12 @@
       stickyCta.classList.toggle('visible-in-scroll', showStickyCta);
       stickyCta.setAttribute('aria-hidden', String(!showStickyCta));
       stickyCta.tabIndex = showStickyCta ? 0 : -1;
+      if (faqFab) {
+        faqFab.classList.toggle('hidden-in-hero', !showStickyCta);
+        faqFab.classList.toggle('visible-in-scroll', showStickyCta);
+        faqFab.setAttribute('aria-hidden', String(!showStickyCta));
+        faqFab.tabIndex = showStickyCta ? 0 : -1;
+      }
       heroCtaContainer?.classList.toggle('fade-out', !isHero);
     }
 
@@ -993,7 +2304,7 @@
     }
 
     function navigate(step) {
-      if (isScrollingLocked || orderDialog.open) return;
+      if (isScrollingLocked || (orderDialog.open || faqDialog.open)) return;
       const origin = currentSection;
       const destination = Math.max(0, Math.min(sections.length - 1, origin + step));
       if (destination === origin) return;
@@ -1008,7 +2319,7 @@
     }
 
     function handleWheel(event) {
-      if (orderDialog.open) return;
+      if ((orderDialog.open || faqDialog.open)) return;
       event.preventDefault();
       const step = event.deltaY > 0 ? 1 : event.deltaY < 0 ? -1 : 0;
       if (step && !wheelInputActive) {
@@ -1021,14 +2332,14 @@
 
     window.addEventListener('wheel', handleWheel, { passive: false });
     window.addEventListener('touchstart', (event) => {
-      if (orderDialog.open) return;
+      if ((orderDialog.open || faqDialog.open)) return;
       if (event.target instanceof Element && event.target.closest('button, a, input, select, textarea')) { touchStart = null; return; }
       if (!event.touches.length) return;
       event.preventDefault();
       touchStart = { x: event.touches[0].clientX, y: event.touches[0].clientY };
     }, { passive: false });
     window.addEventListener('touchmove', (event) => {
-      if (orderDialog.open || !touchStart || !event.touches.length) return;
+      if ((orderDialog.open || faqDialog.open) || !touchStart || !event.touches.length) return;
       event.preventDefault();
       const deltaY = touchStart.y - event.touches[0].clientY;
       const deltaX = touchStart.x - event.touches[0].clientX;
@@ -1039,7 +2350,7 @@
       }
     }, { passive: false });
     window.addEventListener('touchend', (event) => {
-      if (orderDialog.open || !touchStart || !event.changedTouches.length) return;
+      if ((orderDialog.open || faqDialog.open) || !touchStart || !event.changedTouches.length) return;
       event.preventDefault();
       const deltaY = touchStart.y - event.changedTouches[0].clientY;
       const deltaX = touchStart.x - event.changedTouches[0].clientX;
@@ -1049,7 +2360,7 @@
     window.addEventListener('touchcancel', () => { touchStart = null; }, { passive: true });
 
     window.addEventListener('keydown', (event) => {
-      if (orderDialog.open) return;
+      if ((orderDialog.open || faqDialog.open)) return;
       if (['ArrowDown', 'PageDown', ' '].includes(event.key)) {
         event.preventDefault();
         if (!event.repeat) navigate(1);
@@ -1074,14 +2385,287 @@
       if (currentSection === 0 && !isScrollingLocked) startHeroParticles();
     }
 
+    let lastFaqTrigger = null;
+
+    function openFaq() {
+      lastFaqTrigger = document.activeElement;
+      if (typeof faqDialog.showModal === 'function') faqDialog.showModal();
+      else faqDialog.setAttribute('open', '');
+      window.setTimeout(() => document.querySelector('#faq-dialog .faq-close').focus(), 0);
+    }
+
+    function closeFaq() {
+      if (typeof faqDialog.close === 'function') faqDialog.close();
+      else faqDialog.removeAttribute('open');
+      if (lastFaqTrigger && typeof lastFaqTrigger.focus === 'function') lastFaqTrigger.focus();
+    }
+
+    faqDialog.addEventListener('click', (event) => {
+      if (event.target === faqDialog) closeFaq();
+    });
+
     orderDialog.addEventListener('close', () => {
       if (currentSection === 0 && !isScrollingLocked) startHeroParticles();
     });
 
-    document.querySelector('#order-form').addEventListener('submit', (event) => {
-      event.preventDefault();
-      document.querySelector('#order-status').textContent = 'تعذّر إرسال الطلب: لم يتم ربط النموذج بخدمة استقبال الطلبات.';
+    /* ---------- order form: quantity stepper + live price ---------- */
+    const orderForm = document.querySelector('#order-form');
+    const orderStatus = document.querySelector('#order-status');
+    const quantityInput = document.querySelector('#quantity');
+    const UNIT_NOW = 2900;
+    const UNIT_OLD = 4800;
+    const MAX_QTY = 10;
+
+    const money = (value) => value.toLocaleString('en-US');
+
+    function syncOrderPrice() {
+      const qty = Math.min(MAX_QTY, Math.max(1, Math.round(Number(quantityInput.value) || 1)));
+      if (String(qty) !== quantityInput.value) quantityInput.value = qty;
+      document.querySelector('[data-price-now]').textContent = money(UNIT_NOW * qty);
+      document.querySelector('[data-price-old]').textContent = money(UNIT_OLD * qty);
+      document.querySelector('[data-price-save]').textContent = money((UNIT_OLD - UNIT_NOW) * qty);
+    }
+
+    quantityInput.addEventListener('input', syncOrderPrice);
+    quantityInput.addEventListener('blur', syncOrderPrice);
+
+    document.querySelectorAll('.gf-qty-btn').forEach((button) => {
+      button.addEventListener('click', () => {
+        quantityInput.value = (Number(quantityInput.value) || 1) + Number(button.dataset.step || 0);
+        syncOrderPrice();
+      });
     });
+
+    orderForm.querySelectorAll('input, select').forEach((control) => {
+      const field = control.closest('.gf-field');
+      if (!field) return;
+      control.addEventListener('invalid', () => field.classList.add('has-error'));
+      const clearError = () => field.classList.remove('has-error');
+      control.addEventListener('input', clearError);
+      control.addEventListener('change', clearError);
+    });
+
+    orderForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!orderForm.checkValidity()) {
+        orderStatus.textContent = 'يرجى إكمال الحقول المطلوبة: الاسم، الهاتف، الولاية، اللون والمقاس.';
+        orderForm.reportValidity();
+        return;
+      }
+      const data = new FormData(orderForm);
+      orderStatus.textContent = `تم استلام طلبك: ${data.get('name')} · ${data.get('color')} · مقاس ${data.get('size')} · الكمية ${data.get('quantity')}. لم يتم ربط النموذج بخدمة استقبال الطلبات بعد.`;
+    });
+
+    syncOrderPrice();
+
+    /* ---------- final scene: colour switcher ----------
+       Three stacked frames cross-fade, polaroid thumbnails slide up one after
+       another, and the whole scene resets to grey before it fades out. */
+    (function initColorSwitcher() {
+      const section = document.querySelector('.shoe-color-preview-section');
+      if (!section) return;
+      const scene = section.closest('.color-section');
+      const row = section.querySelector('.color-selectors-container');
+      const panel = section.querySelector('.color-ui-panel');
+      const cta = document.querySelector('#color-buy-now-btn');
+      const orderDialogEl = document.querySelector('#order-dialog');
+      const faqDialogEl = document.querySelector('#faq-dialog');
+      /* while a dialog is up the page is inert: any scroll drift it causes must
+         not be read as "the visitor went back", or the swatches vanish */
+      const dialogBusy = () => Boolean((orderDialogEl && orderDialogEl.open) || (faqDialogEl && faqDialogEl.open));
+      const BACK_STEP = 24;
+      const frame = document.getElementById('frame-container');
+      const story = document.getElementById('story');
+      const buttons = Array.prototype.slice.call(section.querySelectorAll('.polaroid-selector'));
+      const images = Array.prototype.slice.call(section.querySelectorAll('.shoe-variant-img'));
+
+      /* warm the three collage frames up while the visitor is still reading,
+         so the scene never opens on an empty (black) frame */
+      const warmUpFrames = () => {
+        images.forEach((img) => {
+          img.loading = 'eager';
+          const loader = new Image();
+          loader.decoding = 'async';
+          loader.src = img.src;
+          if (typeof loader.decode === 'function') loader.decode().catch(() => {});
+        });
+      };
+      if ('requestIdleCallback' in window) requestIdleCallback(warmUpFrames, { timeout: 3000 });
+      else window.setTimeout(warmUpFrames, 1800);
+
+      const FORM_COLORS = { grey: 'رمادي', black: 'أسود', blue: 'أزرق' };
+
+      if (cta) {
+        cta.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const formColor = FORM_COLORS[currentColor];
+          if (formColor) {
+            const radio = document.querySelector('#order-form input[name="color"][value="' + formColor + '"]');
+            if (radio) radio.checked = true;
+          }
+          if (typeof window.scrollToOrderForm === 'function') window.scrollToOrderForm();
+        });
+      }
+
+      const select = (color) => {
+        currentColor = color;
+        buttons.forEach((button) => {
+          const isActive = button.getAttribute('data-target-color') === color;
+          button.classList.toggle('active', isActive);
+          button.setAttribute('aria-pressed', String(isActive));
+        });
+        images.forEach((image) => {
+          image.classList.toggle('active', image.getAttribute('data-color') === color);
+        });
+      };
+      buttons.forEach((button) => {
+        button.addEventListener('click', () => select(button.getAttribute('data-target-color')));
+      });
+
+      /* visibility is driven by IntersectionObserver only — no scroll listeners,
+         no layout reads per frame (that is what made scrolling heavy) */
+      let sceneOn = false;
+      let videoOn = false;
+      let currentColor = 'grey';
+      let fadeTimer = null;
+      const syncZoom = () => {
+        if (frame) frame.classList.toggle('is-final-scene', sceneOn || videoOn);
+      };
+
+      /* a backwards scroll gesture clears the scene immediately, no matter how
+         long the engine's reverse transition takes to start (and a forward one
+         brings the scene back if the engine stayed on this section) */
+      let inView = false;
+      let touchStartY = null;
+      let sectionTop = 0;
+
+      /* the canvas must already hold a frame before the collage is lifted,
+         otherwise the reveal would flash black while the video spins up */
+      const canvasReady = () => Boolean(frame && frame.style.visibility !== 'hidden' && frame.hasAttribute('data-has-frame'));
+
+      const onWheel = (event) => {
+        if (!inView || dialogBusy()) return;
+        if (event.deltaY < 0) hide();
+        else if (event.deltaY > 0 && !sceneOn) retryShow();
+      };
+      const onTouchStart = (event) => {
+        touchStartY = event.touches.length ? event.touches[0].clientY : null;
+      };
+      const onTouchMove = (event) => {
+        if (!inView || dialogBusy() || touchStartY === null || !event.touches.length) return;
+        const delta = touchStartY - event.touches[0].clientY;
+        if (delta < -24 && sceneOn) hide();
+        else if (delta > 24 && !sceneOn) retryShow();
+      };
+      /* the moment the section starts moving back, the collage goes — this
+         catches wheel, touch, keyboard and programmatic scrolling alike */
+      let watchTimer = null;
+      let settled = false;
+      const onScroll = () => {
+        if (!sceneOn || dialogBusy()) return;
+        const top = story.scrollTop;
+        if (top >= sectionTop - BACK_STEP) { settled = true; return; }  /* arrived + parked */
+        if (settled) hide();                                            /* heading back */
+      };
+
+      window.addEventListener('wheel', onWheel, { passive: true });
+      window.addEventListener('touchstart', onTouchStart, { passive: true });
+      window.addEventListener('touchmove', onTouchMove, { passive: true });
+
+      /* A forward flick must never bring the collage back on top of a reverse
+         transition that is already playing: wait it out, then only restore the
+         scene if the engine really did stay parked on this section. */
+      let retryTimer = null;
+      const retryShow = () => {
+        if (retryTimer) return;
+        retryTimer = window.setTimeout(() => {
+          retryTimer = null;
+          if (!sceneOn && inView && settled) show();
+        }, 4000);
+      };
+
+      const show = () => {
+        if (retryTimer) { window.clearTimeout(retryTimer); retryTimer = null; }
+        if (fadeTimer) { window.clearTimeout(fadeTimer); fadeTimer = null; }
+        sceneOn = true;
+        sectionTop = scene ? scene.offsetTop : 0;
+        section.classList.add('is-visible');
+        scene?.classList.add('is-active');
+        syncZoom();
+        row.classList.add('is-visible');
+        panel?.classList.add('is-visible');
+        settled = story.scrollTop >= sectionTop - BACK_STEP; /* already parked on the section? */
+        story.addEventListener('scroll', onScroll, { passive: true });
+        /* last resort: if any scroll event is ever missed, this still clears the
+           scene instead of leaving it on top of the video */
+        if (watchTimer) window.clearInterval(watchTimer);
+        watchTimer = window.setInterval(() => {
+          if (!sceneOn) { window.clearInterval(watchTimer); watchTimer = null; return; }
+          if (settled && !dialogBusy() && story.scrollTop < sectionTop - BACK_STEP) hide();
+        }, 220);
+      };
+
+      const hide = () => {
+        if (!sceneOn) return;
+        sceneOn = false;
+        touchStartY = null;
+        story.removeEventListener('scroll', onScroll);
+        if (watchTimer) { window.clearInterval(watchTimer); watchTimer = null; }
+        if (retryTimer) { window.clearTimeout(retryTimer); retryTimer = null; }
+        row.classList.remove('is-visible');   /* cards drop away first */
+        panel?.classList.remove('is-visible');
+        select('grey');                       /* colour always resets to grey */
+        if (fadeTimer) window.clearTimeout(fadeTimer);
+        const reveal = () => {
+          scene?.classList.remove('is-active');   /* opaque cover lifts … */
+          section.classList.remove('is-visible'); /* … and the collage fades out */
+          syncZoom();
+        };
+        if (canvasReady()) reveal();                      /* same frame as the gesture */
+        else fadeTimer = window.setTimeout(reveal, 120);  /* never flash black */
+      };
+
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (dialogBusy()) return; /* frozen while the order form is open */
+            inView = entry.isIntersecting;
+            if (inView) show();
+            else hide();
+          });
+        }, { threshold: .9 });
+
+        /* closing the form always brings the swatches back if we never left */
+        const resyncScene = () => {
+          if (dialogBusy()) return;
+          const anchor = scene ? scene.offsetTop : sectionTop;
+          const top = story.scrollTop;
+          /* a dialog can leave a few pixels of layout drift behind: treat that as
+             "still parked here" instead of as a backwards scroll */
+          if (Math.abs(top - anchor) <= 120) {
+            sectionTop = top;
+            settled = true;
+          }
+          if (!sceneOn && inView && settled) show();
+        };
+        orderDialogEl?.addEventListener('close', resyncScene);
+        faqDialogEl?.addEventListener('close', resyncScene);
+        io.observe(section);
+
+        /* keep the closing video slightly zoomed while its own section is up */
+        const videoSections = document.querySelectorAll('#story .section.video-section');
+        const lastVideo = videoSections[videoSections.length - 2];
+        if (lastVideo) {
+          const ioVideo = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => { videoOn = entry.isIntersecting; syncZoom(); });
+          }, { threshold: .5 });
+          ioVideo.observe(lastVideo);
+        }
+      } else {
+        show();
+      }
+    })();
 
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
