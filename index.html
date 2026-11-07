@@ -220,6 +220,24 @@
 
     .dynamic-text-stage.technical-section .highlight { color: #00e5ff; }
 
+    /* the tag, the heading and the body rise one after another.
+       Scoped to the engine's stages, so the hero copy is untouched. */
+    .dynamic-text-stage > .feature-tag,
+    .dynamic-text-stage > h2,
+    .dynamic-text-stage > .copy-body {
+      transform: translateY(0);
+      transition: transform .65s cubic-bezier(.16, 1, .3, 1);
+      will-change: transform;
+    }
+
+    .dynamic-text-stage > h2 { transition-delay: .09s; }
+    .dynamic-text-stage > .copy-body { transition-delay: .2s; }
+
+    /* only the incoming state is offset, so the outgoing copy still leaves upward */
+    .dynamic-text-stage.text-stage-hidden-bottom > .feature-tag { transform: translateY(10px); }
+    .dynamic-text-stage.text-stage-hidden-bottom > h2 { transform: translateY(16px); }
+    .dynamic-text-stage.text-stage-hidden-bottom > .copy-body { transform: translateY(22px); }
+
     .ui-container {
       transition: opacity .2s ease-out, transform .2s ease-out;
       opacity: 1;
@@ -1223,63 +1241,23 @@
     .polaroid-slot {
       display: block;
       opacity: 0;
-      transform: translateY(160%);
-      transition: transform .55s cubic-bezier(.22, 1, .36, 1), opacity .45s ease;
+      transform: translateY(150%) scale(.92);
+      transition: transform .62s cubic-bezier(.22, 1, .36, 1), opacity .4s ease;
     }
 
     .color-selectors-container.is-visible .polaroid-slot {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
     }
 
-    .color-selectors-container.is-visible .polaroid-slot:nth-child(1) { transition-delay: 0s, 0s; }
-    .color-selectors-container.is-visible .polaroid-slot:nth-child(2) { transition-delay: .5s, .5s; }
-    .color-selectors-container.is-visible .polaroid-slot:nth-child(3) { transition-delay: 1s, 1s; }
+    .color-selectors-container.is-visible .polaroid-slot:nth-child(1) { transition-delay: .06s, .06s; }
+    .color-selectors-container.is-visible .polaroid-slot:nth-child(2) { transition-delay: .2s, .2s; }
+    .color-selectors-container.is-visible .polaroid-slot:nth-child(3) { transition-delay: .34s, .34s; }
 
     /* leaving: no stagger, straight down and gone */
     .color-selectors-container:not(.is-visible) .polaroid-slot {
       transition: transform .26s cubic-bezier(.55, 0, .9, .4), opacity .18s ease;
     }
-
-    /* order button that lives inside the colour scene (fades out with it) */
-    .color-scene-cta {
-      position: absolute;
-      left: 50%;
-      bottom: calc(18px + env(safe-area-inset-bottom, 0px) + clamp(98px, 27vw, 132px) + 14px);
-      z-index: 12;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      justify-content: center;
-      width: min(78vw, 320px);
-      padding: 13px 18px;
-      border: 1px solid rgba(255, 255, 255, .22);
-      border-top-color: rgba(255, 255, 255, .46);
-      border-radius: 12px;
-      background: linear-gradient(135deg, rgba(38, 38, 40, .93), rgba(11, 12, 15, .96));
-      box-shadow: 0 10px 24px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .18);
-      color: #fff;
-      font: inherit;
-      font-size: clamp(13px, 3.4vw, 16px);
-      font-weight: 800;
-      letter-spacing: .2px;
-      cursor: pointer;
-      opacity: 0;
-      pointer-events: none;
-      transform: translate(-50%, 16px);
-      transition: opacity .3s ease, transform .45s cubic-bezier(.22, 1, .36, 1);
-    }
-
-    .color-scene-cta-icon { flex: 0 0 auto; color: #FF7A00; }
-
-    .shoe-color-preview-section.is-visible .color-scene-cta {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translate(-50%, 0);
-      transition-delay: .85s, .85s;
-    }
-
-    .color-scene-cta:active { transform: translate(-50%, 0) scale(.97); }
 
     .polaroid-selector {
       position: relative;
@@ -1671,14 +1649,6 @@
           </div>
         </div>
 
-        <button class="color-scene-cta" id="color-scene-cta" type="button" aria-label="اطلب الآن — اللون الرمادي">
-          <span class="color-scene-cta-text">اطلب الآن — اللون الرمادي</span>
-          <svg class="color-scene-cta-icon" viewBox="0 0 24 24" width="18" height="18" fill="none"
-               stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="22" y1="2" x2="11" y2="13"></line>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-          </svg>
-        </button>
       </div>
     </section>
   </main>
@@ -2448,34 +2418,7 @@
       if ('requestIdleCallback' in window) requestIdleCallback(warmUpFrames, { timeout: 3000 });
       else window.setTimeout(warmUpFrames, 1800);
 
-      const cta = document.querySelector('#color-scene-cta');
-      const ctaLabel = cta ? cta.querySelector('.color-scene-cta-text') : null;
-      const COLOR_NAMES = { grey: 'الرمادي', black: 'الأسود', blue: 'الأزرق' };
-      const FORM_COLORS = { grey: 'رمادي', black: 'أسود', blue: null };
-      let currentColor = 'grey';
-
-      const syncCtaLabel = (color) => {
-        const name = COLOR_NAMES[color] || COLOR_NAMES.grey;
-        if (ctaLabel) ctaLabel.textContent = `اطلب الآن — اللون ${name}`;
-        if (cta) cta.setAttribute('aria-label', `اطلب الآن — اللون ${name}`);
-      };
-
-      if (cta) {
-        cta.addEventListener('click', (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          const formColor = FORM_COLORS[currentColor];
-          if (formColor) {
-            const radio = document.querySelector(`#order-form input[name="color"][value="${formColor}"]`);
-            if (radio) radio.checked = true;
-          }
-          if (typeof window.scrollToOrderForm === 'function') window.scrollToOrderForm();
-        });
-      }
-
       const select = (color) => {
-        currentColor = color;
-        syncCtaLabel(color);
         buttons.forEach((button) => {
           const isActive = button.getAttribute('data-target-color') === color;
           button.classList.toggle('active', isActive);
