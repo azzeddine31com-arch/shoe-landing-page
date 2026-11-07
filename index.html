@@ -1354,9 +1354,10 @@
       border-radius: 2px;
     }
 
-    .black-box { background-color: #1A1A1A; }
-    .grey-box { background-color: #7D828A; }
-    .blue-box { background-color: #1E3A68; }
+    /* sampled from Color section/assets/*.webp (shoe body, highlights excluded) */
+    .black-box { background-color: #2D232E; }
+    .grey-box { background-color: #7B737A; }
+    .blue-box { background-color: #2D3556; }
 
     .polaroid-selector.active {
       z-index: 2;
@@ -1801,20 +1802,20 @@
                 <span class="req">*</span>
               </div>
               <div class="gf-swatches">
-                <label class="gf-swatch" title="أبيض">
-                  <input type="radio" name="color" value="أبيض" required>
-                  <span class="gf-dot" style="--dot:#ffffff"></span>
-                  <span class="sr-only">أبيض</span>
-                </label>
-                <label class="gf-swatch" title="أسود">
-                  <input type="radio" name="color" value="أسود">
-                  <span class="gf-dot" style="--dot:#1b1d22"></span>
-                  <span class="sr-only">أسود</span>
+                <label class="gf-swatch" title="أزرق">
+                  <input type="radio" name="color" value="أزرق" required>
+                  <span class="gf-dot" style="--dot:#2D3556"></span>
+                  <span class="sr-only">أزرق</span>
                 </label>
                 <label class="gf-swatch" title="رمادي">
                   <input type="radio" name="color" value="رمادي">
-                  <span class="gf-dot" style="--dot:#8d9299"></span>
+                  <span class="gf-dot" style="--dot:#7B737A"></span>
                   <span class="sr-only">رمادي</span>
+                </label>
+                <label class="gf-swatch" title="أسود">
+                  <input type="radio" name="color" value="أسود">
+                  <span class="gf-dot" style="--dot:#2D232E"></span>
+                  <span class="sr-only">أسود</span>
                 </label>
               </div>
             </div>
@@ -2465,6 +2466,12 @@
       const row = section.querySelector('.color-selectors-container');
       const panel = section.querySelector('.color-ui-panel');
       const cta = document.querySelector('#color-buy-now-btn');
+      const orderDialogEl = document.querySelector('#order-dialog');
+      const faqDialogEl = document.querySelector('#faq-dialog');
+      /* while a dialog is up the page is inert: any scroll drift it causes must
+         not be read as "the visitor went back", or the swatches vanish */
+      const dialogBusy = () => Boolean((orderDialogEl && orderDialogEl.open) || (faqDialogEl && faqDialogEl.open));
+      const BACK_STEP = 24;
       const frame = document.getElementById('frame-container');
       const story = document.getElementById('story');
       const buttons = Array.prototype.slice.call(section.querySelectorAll('.polaroid-selector'));
@@ -2484,7 +2491,7 @@
       if ('requestIdleCallback' in window) requestIdleCallback(warmUpFrames, { timeout: 3000 });
       else window.setTimeout(warmUpFrames, 1800);
 
-      const FORM_COLORS = { grey: 'رمادي', black: 'أسود', blue: null };
+      const FORM_COLORS = { grey: 'رمادي', black: 'أسود', blue: 'أزرق' };
 
       if (cta) {
         cta.addEventListener('click', (event) => {
@@ -2536,7 +2543,7 @@
       const canvasReady = () => Boolean(frame && frame.style.visibility !== 'hidden' && frame.hasAttribute('data-has-frame'));
 
       const onWheel = (event) => {
-        if (!inView) return;
+        if (!inView || dialogBusy()) return;
         if (event.deltaY < 0) hide();
         else if (event.deltaY > 0 && !sceneOn) retryShow();
       };
@@ -2544,7 +2551,7 @@
         touchStartY = event.touches.length ? event.touches[0].clientY : null;
       };
       const onTouchMove = (event) => {
-        if (!inView || touchStartY === null || !event.touches.length) return;
+        if (!inView || dialogBusy() || touchStartY === null || !event.touches.length) return;
         const delta = touchStartY - event.touches[0].clientY;
         if (delta < -24 && sceneOn) hide();
         else if (delta > 24 && !sceneOn) retryShow();
@@ -2554,10 +2561,10 @@
       let watchTimer = null;
       let settled = false;
       const onScroll = () => {
-        if (!sceneOn) return;
+        if (!sceneOn || dialogBusy()) return;
         const top = story.scrollTop;
-        if (top >= sectionTop - 8) { settled = true; return; }   /* arrived + parked */
-        if (settled) hide();                                      /* heading back */
+        if (top >= sectionTop - BACK_STEP) { settled = true; return; }  /* arrived + parked */
+        if (settled) hide();                                            /* heading back */
       };
 
       window.addEventListener('wheel', onWheel, { passive: true });
@@ -2586,14 +2593,14 @@
         syncZoom();
         row.classList.add('is-visible');
         panel?.classList.add('is-visible');
-        settled = story.scrollTop >= sectionTop - 8; /* already parked on the section? */
+        settled = story.scrollTop >= sectionTop - BACK_STEP; /* already parked on the section? */
         story.addEventListener('scroll', onScroll, { passive: true });
         /* last resort: if any scroll event is ever missed, this still clears the
            scene instead of leaving it on top of the video */
         if (watchTimer) window.clearInterval(watchTimer);
         watchTimer = window.setInterval(() => {
           if (!sceneOn) { window.clearInterval(watchTimer); watchTimer = null; return; }
-          if (settled && story.scrollTop < sectionTop - 8) hide();
+          if (settled && !dialogBusy() && story.scrollTop < sectionTop - BACK_STEP) hide();
         }, 220);
       };
 
@@ -2620,11 +2627,28 @@
       if ('IntersectionObserver' in window) {
         const io = new IntersectionObserver((entries) => {
           entries.forEach((entry) => {
+            if (dialogBusy()) return; /* frozen while the order form is open */
             inView = entry.isIntersecting;
             if (inView) show();
             else hide();
           });
         }, { threshold: .9 });
+
+        /* closing the form always brings the swatches back if we never left */
+        const resyncScene = () => {
+          if (dialogBusy()) return;
+          const anchor = scene ? scene.offsetTop : sectionTop;
+          const top = story.scrollTop;
+          /* a dialog can leave a few pixels of layout drift behind: treat that as
+             "still parked here" instead of as a backwards scroll */
+          if (Math.abs(top - anchor) <= 120) {
+            sectionTop = top;
+            settled = true;
+          }
+          if (!sceneOn && inView && settled) show();
+        };
+        orderDialogEl?.addEventListener('close', resyncScene);
+        faqDialogEl?.addEventListener('close', resyncScene);
         io.observe(section);
 
         /* keep the closing video slightly zoomed while its own section is up */
