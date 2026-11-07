@@ -56,6 +56,12 @@ python3 tools/check-assets.py
 
 It prints `all references resolve` when every static reference **and** every transition clip listed in the `data-forward` / `data-reverse` / `data-anchor` attributes exists with the exact same case.
 
+## How loading works
+
+- **Nothing is downloaded up front.** All 22 transition clips are created with `preload="none"`; a sliding queue (`primeSection()`) fetches only the two clips the next gesture can trigger (forward of the current section, reverse of it) plus one look-ahead, so ~2 MiB of media is in flight instead of 23 MiB. The 11 anchor stills are lazily fetched the same way.
+- **Ready-state gate.** `playTransition()` waits for `canplay` (`HAVE_FUTURE_DATA`) while holding the current frame, instead of cutting straight to the still. It gives up only when the download actually stalls (2.6 s without progress) or after 9 s, and then falls back to the anchor as before.
+- **The order form is pre-warmed** at idle time (`requestIdleCallback`, low priority): its four CSS backgrounds (284 KiB) are fetched before the first tap, so opening it costs 0 requests.
+
 ## Notes
 
 - Fonts load from Google Fonts (`Alexandria`, `Tajawal`, `Titan One`); everything else is local.

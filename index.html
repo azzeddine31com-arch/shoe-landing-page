@@ -2097,20 +2097,21 @@
         const video = document.createElement('video');
         video.muted = true;
         video.playsInline = true;
-        video.preload = 'auto';
+        video.preload = 'none';   /* the sliding queue decides what gets fetched */
         video.controls = false;
         video.loop = false;
         video.disablePictureInPicture = true;
         video.setAttribute('aria-hidden', 'true');
         video.src = new URL(`Main%20video/transitions/${file}`, document.baseURI).href;
-        video.load();
         return video;
       };
       const anchor = new Image();
       anchor.decoding = 'async';
       anchor.loading = 'eager';
-      anchor.fetchPriority = 'high';
-      anchor.src = new URL(`Main%20video/transitions/${section.dataset.anchor}`, document.baseURI).href;
+      /* low: the transition clips must win the wire, the still is only a fallback */
+      anchor.fetchPriority = 'low';
+      /* src is set by warmAnchor(): the 11 stills (2.3 MiB) no longer race the clips */
+      const anchorSrc = new URL(`Main%20video/transitions/${section.dataset.anchor}`, document.baseURI).href;
       const track = {
         section,
         index,
@@ -2118,7 +2119,8 @@
         duration: Number(section.dataset.duration),
         forward: makeVideo(section.dataset.forward),
         reverse: makeVideo(section.dataset.reverse),
-        anchor
+        anchor,
+        anchorSrc
       };
       anchor.onload = () => {
         if (!isScrollingLocked && currentSection === track.index + 1) {
@@ -2127,6 +2129,85 @@
       };
       return track;
     });
+
+    /* ---------- sliding preload queue ----------
+       Nothing is fetched up front any more. When the story settles on a section
+       we warm exactly the two clips the next gesture can trigger (forward of
+       this section, reverse of it) and, a moment later, the one after that, so
+       roughly 1.2 MiB of media is in flight instead of all 23 MiB. */
+    const warmedVideos = new WeakSet();
+    let lookaheadTimer = null;
+
+    function warmVideo(video) {
+      if (!video || warmedVideos.has(video)) return;
+      warmedVideos.add(video);
+      video.preload = 'auto';
+      try { video.load(); } catch (_) { /* already loading */ }
+    }
+
+    const warmedAnchors = new WeakSet();
+    function warmAnchor(track) {
+      if (!track || warmedAnchors.has(track.anchor)) return;
+      warmedAnchors.add(track.anchor);
+      track.anchor.src = track.anchorSrc;
+    }
+
+    function primeSection(sectionNumber) {
+      const forwardClip = tracks[sectionNumber];                                 /* section -> section + 1 */
+      const backClip = sectionNumber > 0 ? tracks[sectionNumber - 1] : null;     /* section -> section - 1 */
+      if (forwardClip) { warmVideo(forwardClip.forward); warmAnchor(forwardClip); }
+      if (backClip) { warmVideo(backClip.reverse); warmAnchor(backClip); }
+
+      if (lookaheadTimer) { window.clearTimeout(lookaheadTimer); lookaheadTimer = null; }
+      const ahead = tracks[sectionNumber + 1];
+      if (!ahead) return;
+      /* the look-ahead only starts once the clip the visitor needs right now is
+         playable — on a slow link it must never steal its bandwidth */
+      const queueAhead = () => {
+        lookaheadTimer = null;
+        warmVideo(ahead.forward);
+        warmAnchor(ahead);
+        if (forwardClip) warmVideo(forwardClip.reverse);
+      };
+      const probe = forwardClip ? forwardClip.forward : null;
+      if (!probe || probe.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+        lookaheadTimer = window.setTimeout(queueAhead, 800);
+      } else {
+        probe.addEventListener('canplay', () => {
+          if (lookaheadTimer) window.clearTimeout(lookaheadTimer);
+          lookaheadTimer = window.setTimeout(queueAhead, 800);
+        }, { once: true });
+      }
+    }
+
+    /* ---------- form assets ----------
+       The torn paper, backdrop, price ticket and button texture are CSS
+       backgrounds inside a closed <dialog> (display:none), so the browser only
+       fetches them when the form opens — a 284 KiB stall on the first tap.
+       Warm them once the browser is idle, at low priority, and keep the objects
+       alive so the decoded images stay in the cache. */
+    (function prewarmFormAssets() {
+      const formAssets = [
+        'Form/assets/backdrop.webp',
+        'Form/assets/torn-paper-frame.webp',
+        'Form/assets/price-ticket.webp',
+        'Form/assets/button-texture.webp'
+      ];
+      const kept = [];
+      const warm = () => {
+        formAssets.forEach((src) => {
+          const img = new Image();
+          img.fetchPriority = 'low';
+          img.decoding = 'async';
+          img.src = new URL(src, document.baseURI).href;
+          kept.push(img);
+        });
+      };
+      if ('requestIdleCallback' in window) window.requestIdleCallback(warm, { timeout: 3000 });
+      else window.setTimeout(warm, 2200);
+    })();
+
+    primeSection(0);
 
     function seedHeroParticles() {
       const width = window.innerWidth;
@@ -2381,6 +2462,7 @@
       isScrollingLocked = false;
       activeVideo = null;
       activeTransitionId += 1;
+      primeSection(destination);
       if (destination === 0) {
         fadeBackToHero(activeTransitionId);
         startHeroParticles();
@@ -2414,22 +2496,79 @@
       frameContainer.classList.remove('is-fading');
       transitionRevealTriggered = false;
       activeVideo = video;
-      try { video.currentTime = 0; } catch (_) { /* Metadata may not be ready yet. */ }
+
+      /* the clip we are about to play jumps the queue */
+      primeSection(destination);
+      warmVideo(video);
+
       const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : track.duration;
-      transitionSafetyTimer = window.setTimeout(() => finishTransition(video, destination, transitionId), (duration + 1.25) * 1000);
-      try {
-        const playback = video.play();
-        if (playback && typeof playback.catch === 'function') playback.catch((error) => {
-          if (transitionId === activeTransitionId) {
-            console.warn('Transition video could not play:', error);
-            finishTransition(video, destination, transitionId);
-          }
-        });
-      } catch (error) {
-        console.warn('Transition video could not start:', error);
-        finishTransition(video, destination, transitionId);
+
+      const startPlayback = () => {
+        if (transitionId !== activeTransitionId || !isScrollingLocked) return;
+        try { video.currentTime = 0; } catch (_) { /* Metadata may not be ready yet. */ }
+        transitionSafetyTimer = window.setTimeout(() => finishTransition(video, destination, transitionId), (duration + 1.25) * 1000);
+        try {
+          const playback = video.play();
+          if (playback && typeof playback.catch === 'function') playback.catch((error) => {
+            if (transitionId === activeTransitionId) {
+              console.warn('Transition video could not play:', error);
+              finishTransition(video, destination, transitionId);
+            }
+          });
+        } catch (error) {
+          console.warn('Transition video could not start:', error);
+          finishTransition(video, destination, transitionId);
+          return;
+        }
+        renderTransition(video, destination, transitionId, duration);
+      };
+
+      /* ready-state gate: only start when there is enough data for smooth
+         playback, otherwise hold the current frame instead of cutting to the
+         still. Bounded, so a dead connection can never freeze the story. */
+      if (video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+        startPlayback();
+        return;
       }
-      renderTransition(video, destination, transitionId, duration);
+
+      let settled = false;
+      const startedWaiting = performance.now();
+      const STALL_MS = 2600;   /* give up only when the download itself stops */
+      const WAIT_CAP_MS = 9000;
+      let lastProgressAt = startedWaiting;
+      let lastProgress = -1;
+      let waitTimer = null;
+      const release = () => {
+        if (waitTimer) window.clearInterval(waitTimer);
+        waitTimer = null;
+        video.removeEventListener('canplay', onReady);
+        video.removeEventListener('canplaythrough', onReady);
+      };
+      const onReady = () => {
+        if (settled) return;
+        settled = true;
+        release();
+        startPlayback();
+      };
+      const progressMarker = () => {
+        let buffered = 0;
+        try { if (video.buffered.length) buffered = video.buffered.end(video.buffered.length - 1); } catch (_) { /* ignore */ }
+        return buffered + video.readyState;
+      };
+      video.addEventListener('canplay', onReady);
+      video.addEventListener('canplaythrough', onReady);
+      waitTimer = window.setInterval(() => {
+        if (settled) return;
+        const marker = progressMarker();
+        if (marker !== lastProgress) { lastProgress = marker; lastProgressAt = performance.now(); }
+        const stalled = performance.now() - lastProgressAt > STALL_MS;
+        const exhausted = performance.now() - startedWaiting > WAIT_CAP_MS;
+        if (stalled || exhausted) {
+          settled = true;
+          release();
+          finishTransition(video, destination, transitionId);
+        }
+      }, 250);
     }
 
     function navigate(step) {
